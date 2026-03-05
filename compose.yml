@@ -1,0 +1,44 @@
+services:
+  claude:
+    image: ${AGENT_NAMESPACE:-vibepod}/claude:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/claude
+      dockerfile: Dockerfile
+      args:
+        CLAUDE_CODE_CHANNEL: ${CLAUDE_CODE_CHANNEL:-latest}
+
+  gemini:
+    image: ${AGENT_NAMESPACE:-vibepod}/gemini:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/gemini
+      dockerfile: Dockerfile
+
+  opencode:
+    image: ${AGENT_NAMESPACE:-vibepod}/opencode:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/opencode
+      dockerfile: Dockerfile
+
+  devstral:
+    image: ${AGENT_NAMESPACE:-vibepod}/devstral:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/devstral
+      dockerfile: Dockerfile
+
+  auggie:
+    image: ${AGENT_NAMESPACE:-vibepod}/auggie:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/auggie
+      dockerfile: Dockerfile
+
+  copilot:
+    image: ${AGENT_NAMESPACE:-vibepod}/copilot:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/copilot
+      dockerfile: Dockerfile
+
+  codex:
+    image: ${AGENT_NAMESPACE:-vibepod}/codex:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/codex
+      dockerfile: Dockerfile
