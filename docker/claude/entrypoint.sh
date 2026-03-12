@@ -8,9 +8,61 @@ set -eu
 
 USER_UID="${USER_UID:-1000}"
 USER_GID="${USER_GID:-1000}"
+CLAUDE_CONFIG_DIR="${CLAUDE_CONFIG_DIR:-/claude}"
+
+ensure_default_marketplace() {
+    local SETTINGS_FILE="${CLAUDE_CONFIG_DIR%/}/settings.json"
+
+    if ! mkdir -p "$CLAUDE_CONFIG_DIR" 2>/dev/null; then
+        return 0
+    fi
+
+    if [ -s "$SETTINGS_FILE" ]; then
+        return 0
+    fi
+
+    if ! cat >"$SETTINGS_FILE" <<'EOF'
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": "github",
+      "repo": "anthropics/claude-plugins-official"
+    }
+  }
+}
+EOF
+    then
+        printf 'warning: could not initialize Claude marketplace defaults at %s\n' "$SETTINGS_FILE" >&2
+        return 0
+    fi
+
+    if [ "$USER_UID" -ne 0 ]; then
+        chown "$USER_UID:$USER_GID" "$SETTINGS_FILE" 2>/dev/null || true
+    fi
+}
+
+# If a proxy CA cert is mounted, append it to the system CA bundle so all
+# HTTPS clients (git, curl, node, etc.) trust traffic through the proxy.
+# Note: path is Debian-specific; update if the base image changes.
+setup_proxy_ca() {
+    if [ -n "${SSL_CERT_FILE:-}" ] && [ -f "$SSL_CERT_FILE" ]; then
+        if ! grep -qF "$(sed -n '2p' "$SSL_CERT_FILE")" /etc/ssl/certs/ca-certificates.crt 2>/dev/null; then
+            cat "$SSL_CERT_FILE" >> /etc/ssl/certs/ca-certificates.crt 2>/dev/null || true
+        fi
+    fi
+}
+
+# Use HTTPS instead of SSH for GitHub clones (no SSH key needed for public repos).
+setup_git_config() {
+    git config --system url."https://github.com/".insteadOf "git@github.com:" 2>/dev/null || true
+}
 
 # If running as root (UID 0), stay as root.
 if [ "$USER_UID" -eq 0 ]; then
+    ensure_default_marketplace
+    setup_proxy_ca
+    setup_git_config
     exec "$@"
 fi
 
@@ -44,16 +96,22 @@ fi
 mkdir -p "$USER_HOME"
 chown "$USER_UID:$USER_GID" "$USER_HOME" 2>/dev/null || true
 
+# Initialize default marketplace settings after user/group setup.
+ensure_default_marketplace
+
 # Ensure config directory is accessible without recursively changing credentials.
-if [ -d /claude ]; then
-    chown "$USER_UID:$USER_GID" /claude 2>/dev/null || true
-    chmod 755 /claude 2>/dev/null || true
+if [ -d "$CLAUDE_CONFIG_DIR" ]; then
+    chown "$USER_UID:$USER_GID" "$CLAUDE_CONFIG_DIR" 2>/dev/null || true
+    chmod 755 "$CLAUDE_CONFIG_DIR" 2>/dev/null || true
 fi
 
 # Keep workspace accessible; file ownership is handled by runtime uid:gid.
 if [ -d /workspace ]; then
     chmod 755 /workspace 2>/dev/null || true
 fi
+
+setup_proxy_ca
+setup_git_config
 
 export SHELL=/bin/bash
 export HOME="$USER_HOME"
