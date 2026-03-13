@@ -26,8 +26,10 @@ ensure_default_marketplace() {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
-      "source": "github",
-      "repo": "anthropics/claude-plugins-official"
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
     }
   }
 }
