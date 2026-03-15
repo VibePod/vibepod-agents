@@ -115,8 +115,34 @@ fi
 setup_proxy_ca
 setup_git_config
 
+# Set up ~/.local/bin for the user so the native install is on PATH and
+# `claude doctor` does not warn about it being missing.
+CLAUDE_BIN=/root/.local/bin/claude
+USER_LOCAL_BIN="${USER_HOME}/.local/bin"
+mkdir -p "$USER_LOCAL_BIN" 2>/dev/null || true
+if [ ! -e "${USER_LOCAL_BIN}/claude" ] && [ -x "$CLAUDE_BIN" ]; then
+    ln -sf "$CLAUDE_BIN" "${USER_LOCAL_BIN}/claude" 2>/dev/null || true
+fi
+chown -R "$USER_UID:$USER_GID" "${USER_HOME}/.local" 2>/dev/null || true
+
+# Ensure ~/.local/bin is on PATH in ~/.bashrc for interactive shells.
+BASHRC="${USER_HOME}/.bashrc"
+if ! grep -qF '.local/bin' "$BASHRC" 2>/dev/null; then
+    printf '\nexport PATH="$HOME/.local/bin:$PATH"\n' >> "$BASHRC" 2>/dev/null || true
+    chown "$USER_UID:$USER_GID" "$BASHRC" 2>/dev/null || true
+fi
+
+# Write ~/.claude.json with installMethod so `claude doctor` reports the
+# correct config install method instead of "unknown".
+CLAUDE_JSON="${USER_HOME}/.claude.json"
+if [ ! -f "$CLAUDE_JSON" ]; then
+    printf '{"installMethod":"native"}\n' > "$CLAUDE_JSON" 2>/dev/null || true
+    chown "$USER_UID:$USER_GID" "$CLAUDE_JSON" 2>/dev/null || true
+fi
+
 export SHELL=/bin/bash
 export HOME="$USER_HOME"
 export USER="$USER_NAME"
+export PATH="${USER_LOCAL_BIN}:${PATH}"
 
 exec gosu "$USER_UID:$USER_GID" "$@"
