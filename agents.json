@@ -1,0 +1,89 @@
+{
+  "agents": [
+    {
+      "target": "claude",
+      "image_name": "claude",
+      "docker_context": "docker/claude",
+      "dockerfile": "docker/claude/Dockerfile",
+      "version_command": "claude --version",
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "build_args": { "CLAUDE_CODE_CHANNEL": "latest" },
+      "automation": {
+        "enabled": true,
+        "source": { "type": "github_release", "repo": "anthropics/claude-code" }
+      }
+    },
+    {
+      "target": "gemini",
+      "image_name": "gemini",
+      "docker_context": "docker/gemini",
+      "dockerfile": "docker/gemini/Dockerfile",
+      "version_command": "export HOME=/tmp/gemini-home; mkdir -p \"$HOME/.gemini\"; NODE_NO_WARNINGS=1 node /usr/local/bin/gemini --version",
+      "platforms": ["linux/amd64"],
+      "automation": {
+        "enabled": true,
+        "source": { "type": "npm", "package": "@google/gemini-cli" }
+      }
+    },
+    {
+      "target": "opencode",
+      "image_name": "opencode",
+      "docker_context": "docker/opencode",
+      "dockerfile": "docker/opencode/Dockerfile",
+      "version_command": "opencode --version",
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "automation": {
+        "enabled": true,
+        "source": { "type": "npm", "package": "opencode-ai" }
+      }
+    },
+    {
+      "target": "devstral",
+      "image_name": "devstral",
+      "docker_context": "docker/devstral",
+      "dockerfile": "docker/devstral/Dockerfile",
+      "version_command": "vibe --version",
+      "platforms": ["linux/amd64"],
+      "automation": {
+        "enabled": true,
+        "source": { "type": "github_release", "repo": "mistralai/mistral-vibe" }
+      }
+    },
+    {
+      "target": "auggie",
+      "image_name": "auggie",
+      "docker_context": "docker/auggie",
+      "dockerfile": "docker/auggie/Dockerfile",
+      "version_command": "auggie --version",
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "automation": {
+        "enabled": true,
+        "source": { "type": "npm", "package": "@augmentcode/auggie" }
+      }
+    },
+    {
+      "target": "copilot",
+      "image_name": "copilot",
+      "docker_context": "docker/copilot",
+      "dockerfile": "docker/copilot/Dockerfile",
+      "version_command": "copilot --version",
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "automation": {
+        "enabled": true,
+        "source": { "type": "npm", "package": "@github/copilot" }
+      }
+    },
+    {
+      "target": "codex",
+      "image_name": "codex",
+      "docker_context": "docker/codex",
+      "dockerfile": "docker/codex/Dockerfile",
+      "version_command": "codex --version",
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "automation": {
+        "enabled": true,
+        "source": { "type": "npm", "package": "@openai/codex" }
+      }
+    }
+  ]
+}
