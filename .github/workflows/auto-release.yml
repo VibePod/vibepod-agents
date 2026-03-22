@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "17 */6 * * *"
   workflow_dispatch:
+    inputs:
+      update_descriptions:
+        description: 'Update Docker Hub descriptions for all agents (skips image publish)'
+        type: boolean
+        default: false
 
 concurrency:
   group: auto-publish-agent-images
@@ -152,6 +157,55 @@ jobs:
             --output-page wiki/Container-Versions.md \
             --generated-at "${CHECKED_AT}"
 
+      - name: Generate Docker Hub descriptions
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/generate-hub-descriptions.mjs \
+            --catalog wiki/automation/agent-versions.json \
+            --descriptions descriptions
+
+      - name: Update Docker Hub descriptions
+        shell: bash
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TOKEN=$(curl -s -X POST "https://hub.docker.com/v2/users/login" \
+            -H "Content-Type: application/json" \
+            -d "{\"username\":\"${DOCKERHUB_USERNAME}\",\"password\":\"${DOCKERHUB_TOKEN}\"}" \
+            | jq -r .token)
+          if [[ -z "${TOKEN}" || "${TOKEN}" == "null" ]]; then
+            echo "error: Docker Hub login failed — check DOCKERHUB_USERNAME and DOCKERHUB_TOKEN secrets"
+            exit 1
+          fi
+
+          for agent in auggie claude codex copilot devstral gemini opencode; do
+            output_dir="descriptions/${agent}/output"
+            if [[ ! -f "${output_dir}/short-description.txt" || ! -f "${output_dir}/overview.md" ]]; then
+              echo "Skipping ${agent}: output files not found"
+              continue
+            fi
+            SHORT=$(cat "${output_dir}/short-description.txt")
+            FULL=$(cat "${output_dir}/overview.md")
+            RESPONSE=$(curl -s -w "\n%{http_code}" \
+              -X PATCH "https://hub.docker.com/v2/repositories/vibepod/${agent}/" \
+              -H "Authorization: JWT ${TOKEN}" \
+              -H "Content-Type: application/json" \
+              --data-binary "$(jq -n \
+                --arg d "$SHORT" \
+                --arg f "$FULL" \
+                '{description: $d, full_description: $f}')")
+            HTTP_STATUS=$(echo "${RESPONSE}" | tail -1)
+            if [[ "${HTTP_STATUS}" != "200" ]]; then
+              echo "error: failed to update ${agent} (HTTP ${HTTP_STATUS})"
+              echo "response body: $(echo "${RESPONSE}" | head -n -1)"
+              exit 1
+            fi
+            echo "updated: ${agent}"
+          done
+
       - name: Commit and push wiki state
         shell: bash
         env:
@@ -170,3 +224,80 @@ jobs:
           git add automation/agent-versions.json Container-Versions.md
           git commit -m "chore: update container version state (${CHECKED_AT})"
           git push
+
+  sync-hub-descriptions:
+    if: inputs.update_descriptions == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Clone wiki repository
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git clone \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git" \
+            wiki
+
+      - name: Generate Docker Hub descriptions
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/generate-hub-descriptions.mjs \
+            --catalog wiki/automation/agent-versions.json \
+            --descriptions descriptions
+          generated=$(find descriptions -path "*/output/overview.md" | wc -l)
+          if [[ "${generated}" -eq 0 ]]; then
+            echo "error: no description output files were generated"
+            echo "descriptions/ contents:"
+            ls -la descriptions/ || echo "(directory not found)"
+            exit 1
+          fi
+          echo "Generated descriptions for ${generated} agent(s)"
+
+      - name: Update Docker Hub descriptions
+        shell: bash
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TOKEN=$(curl -s -X POST "https://hub.docker.com/v2/users/login" \
+            -H "Content-Type: application/json" \
+            -d "{\"username\":\"${DOCKERHUB_USERNAME}\",\"password\":\"${DOCKERHUB_TOKEN}\"}" \
+            | jq -r .token)
+          if [[ -z "${TOKEN}" || "${TOKEN}" == "null" ]]; then
+            echo "error: Docker Hub login failed — check DOCKERHUB_USERNAME and DOCKERHUB_TOKEN secrets"
+            exit 1
+          fi
+
+          for agent in auggie claude codex copilot devstral gemini opencode; do
+            output_dir="descriptions/${agent}/output"
+            if [[ ! -f "${output_dir}/short-description.txt" || ! -f "${output_dir}/overview.md" ]]; then
+              echo "Skipping ${agent}: output files not found"
+              continue
+            fi
+            SHORT=$(cat "${output_dir}/short-description.txt")
+            FULL=$(cat "${output_dir}/overview.md")
+            RESPONSE=$(curl -s -w "\n%{http_code}" \
+              -X PATCH "https://hub.docker.com/v2/repositories/vibepod/${agent}/" \
+              -H "Authorization: JWT ${TOKEN}" \
+              -H "Content-Type: application/json" \
+              --data-binary "$(jq -n \
+                --arg d "$SHORT" \
+                --arg f "$FULL" \
+                '{description: $d, full_description: $f}')")
+            HTTP_STATUS=$(echo "${RESPONSE}" | tail -1)
+            if [[ "${HTTP_STATUS}" != "200" ]]; then
+              echo "error: failed to update ${agent} (HTTP ${HTTP_STATUS})"
+              echo "response body: $(echo "${RESPONSE}" | head -n -1)"
+              exit 1
+            fi
+            echo "updated: ${agent}"
+          done

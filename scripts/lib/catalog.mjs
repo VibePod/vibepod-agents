@@ -31,7 +31,7 @@ export function nextImageTag(previousTag, isoTimestamp) {
   return `${prefix}.1`;
 }
 
-function markdownTable(headers, rows) {
+export function markdownTable(headers, rows) {
   const escapedHeaders = headers.map((header) => header.replace(/\|/g, "\\|"));
   const headerLine = `| ${escapedHeaders.join(" | ")} |`;
   const separatorLine = `| ${headers.map(() => "---").join(" | ")} |`;
@@ -53,7 +53,7 @@ function dockerRepoLink(agent) {
   return `[${repo}](https://hub.docker.com/r/${repo})`;
 }
 
-function dockerTagLink(agent, tag) {
+export function dockerTagLink(agent, tag) {
   if (!tag) {
     return "";
   }
