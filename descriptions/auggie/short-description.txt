@@ -1,0 +1,1 @@
+Augment Code CLI in a container — Node.js Debian Slim, multi-arch (amd64/arm64), UID/GID mapping

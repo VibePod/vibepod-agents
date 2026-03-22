@@ -1,0 +1,1 @@
+Claude Code in a container — Debian Bookworm, multi-arch (amd64/arm64), dynamic UID/GID mapping

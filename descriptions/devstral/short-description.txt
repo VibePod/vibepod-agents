@@ -1,0 +1,1 @@
+Devstral (mistral-vibe) in a container — Debian Bookworm, amd64 only, UID/GID mapping
