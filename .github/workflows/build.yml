@@ -69,5 +69,5 @@ jobs:
           push: false
           provenance: false
           sbom: false
-          cache-from: type=gha,scope=${{ matrix.target }}
+          no-cache: true
           cache-to: type=gha,mode=max,scope=${{ matrix.target }}
