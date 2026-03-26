@@ -88,6 +88,7 @@ Claude image note:
   - tracking page URL: `https://github.com/VibePod/vibepod-agents/wiki/Container-Versions`
   - CI is update-only (fails if wiki state/page are missing)
   - creates a new image only when tracked upstream version changes
+  - manual dispatch supports `force_recreate_latest=true` to rebuild unchanged agents and publish a new dated tag plus `latest`
   - publishes `<YYYY.MM.N>` and `latest` for changed containers only
   - updates wiki state after a successful publish
 

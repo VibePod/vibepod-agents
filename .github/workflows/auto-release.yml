@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: "17 */6 * * *"
   workflow_dispatch:
+    inputs:
+      force_recreate_latest:
+        description: "Force recreate images even when tracked upstream version is unchanged"
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: auto-publish-agent-images
@@ -55,13 +61,23 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FORCE_RECREATE_LATEST: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.force_recreate_latest || 'false' }}
         run: |
           set -euo pipefail
-          node scripts/check-agent-updates.mjs \
-            --catalog wiki/automation/agent-versions.json \
-            --report wiki/automation/agent-update-report.json \
-            --github-output "${GITHUB_OUTPUT}" \
+
+          args=(
+            --catalog wiki/automation/agent-versions.json
+            --report wiki/automation/agent-update-report.json
+            --github-output "${GITHUB_OUTPUT}"
             --step-summary "${GITHUB_STEP_SUMMARY}"
+          )
+
+          if [[ "${FORCE_RECREATE_LATEST}" == "true" ]]; then
+            echo "Manual force recreate enabled."
+            args+=(--force-recreate-latest)
+          fi
+
+          node scripts/check-agent-updates.mjs "${args[@]}"
 
   publish:
     needs: detect

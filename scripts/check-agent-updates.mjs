@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   nextImageTag,
   nowUtcIso,
@@ -143,18 +145,13 @@ function appendSummary(summaryPath, report, statusRows) {
   fs.appendFileSync(summaryPath, `${lines.join("\n")}\n`, "utf8");
 }
 
-async function main() {
-  const args = parseArgs(process.argv);
-  const catalogPath = args.catalog || "agents.json";
-  const reportPath = args.report || "automation/agent-update-report.json";
-  const checkedAt = args["checked-at"] || nowUtcIso();
-  const githubOutput = args["github-output"];
-  const stepSummary = args["step-summary"];
-  const dryRun = args["dry-run"] === "true" || "dry-run" in args;
-
-  const catalog = readJson(catalogPath);
-  const agents = catalog.agents || [];
-
+export async function planAgentUpdates({
+  agents,
+  checkedAt,
+  forceRecreateLatest = false,
+  resolveLatestVersion = fetchLatestVersion,
+  checkLatestTagExists = fetchLatestTagExists,
+}) {
   const updates = [];
   const statusRows = [];
 
@@ -176,7 +173,7 @@ async function main() {
       continue;
     }
 
-    const resolved = await fetchLatestVersion(source);
+    const resolved = await resolveLatestVersion(source);
     if (!resolved.supported) {
       statusRows.push({
         target,
@@ -190,11 +187,12 @@ async function main() {
     }
 
     const latestVersion = resolved.latestVersion;
-
     const imageName = agent.image_name || agent.target;
-    const hasLatest = await fetchLatestTagExists(imageName);
+    const hasLatest = await checkLatestTagExists(imageName);
+    const trackedMatchesLatest = hasLatest && latestVersion === trackedVersion;
+    const forceRecreate = trackedMatchesLatest && forceRecreateLatest;
 
-    if (hasLatest && latestVersion === trackedVersion) {
+    if (trackedMatchesLatest && !forceRecreate) {
       statusRows.push({
         target,
         mode: "auto",
@@ -207,9 +205,20 @@ async function main() {
     }
 
     const nextTag = nextImageTag(agent?.tracked?.image_tag || "", checkedAt);
-    const reason = hasLatest
-      ? `Upstream ${sourceLabel(source)} updated`
-      : "No latest tag on Docker Hub";
+    let reason = "";
+    let result = "";
+
+    if (forceRecreate) {
+      reason = "Manual force recreate of latest image";
+      result = `force-recreate -> ${nextTag}`;
+    } else if (hasLatest) {
+      reason = `Upstream ${sourceLabel(source)} updated`;
+      result = `update -> ${nextTag}`;
+    } else {
+      reason = "No latest tag on Docker Hub";
+      result = `no-latest -> ${nextTag}`;
+    }
+
     const update = {
       target,
       image_name: agent.image_name,
@@ -233,9 +242,32 @@ async function main() {
       source: sourceLabel(source),
       tracked: trackedVersion,
       latest: latestVersion,
-      result: hasLatest ? `update -> ${nextTag}` : `no-latest -> ${nextTag}`,
+      result,
     });
   }
+
+  return { updates, statusRows };
+}
+
+async function main() {
+  const args = parseArgs(process.argv);
+  const catalogPath = args.catalog || "agents.json";
+  const reportPath = args.report || "automation/agent-update-report.json";
+  const checkedAt = args["checked-at"] || nowUtcIso();
+  const githubOutput = args["github-output"];
+  const stepSummary = args["step-summary"];
+  const dryRun = args["dry-run"] === "true" || "dry-run" in args;
+  const forceRecreateLatest =
+    args["force-recreate-latest"] === "true" || "force-recreate-latest" in args;
+
+  const catalog = readJson(catalogPath);
+  const agents = catalog.agents || [];
+
+  const { updates, statusRows } = await planAgentUpdates({
+    agents,
+    checkedAt,
+    forceRecreateLatest,
+  });
 
   const report = {
     changed: updates.length > 0,
@@ -297,7 +329,12 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : error);
-  process.exit(1);
-});
+const invokedPath = process.argv[1] ? path.resolve(process.argv[1]) : "";
+const currentScriptPath = fileURLToPath(import.meta.url);
+
+if (invokedPath === currentScriptPath) {
+  main().catch((error) => {
+    console.error(error instanceof Error ? error.message : error);
+    process.exit(1);
+  });
+}
