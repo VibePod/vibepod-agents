@@ -129,6 +129,7 @@ jobs:
             ${{ env.AGENT_NAMESPACE }}/${{ matrix.image_name }}:latest
           provenance: false
           sbom: false
+          no-cache: true
           cache-from: type=gha,scope=${{ matrix.target }}
           cache-to: type=gha,mode=max,scope=${{ matrix.target }}
 
