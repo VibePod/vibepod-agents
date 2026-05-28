@@ -16,6 +16,7 @@ docker/
   auggie/
   copilot/
   codex/
+  pi/
 .github/workflows/
   build.yml
   auto-release.yml
@@ -40,6 +41,7 @@ scripts/
 | `auggie` | `vibepod/auggie` | [npm:@augmentcode/auggie](https://www.npmjs.com/package/@augmentcode/auggie) |
 | `copilot` | `vibepod/copilot` | [npm:@github/copilot](https://www.npmjs.com/package/@github/copilot) |
 | `codex` | `vibepod/codex` | [npm:@openai/codex](https://www.npmjs.com/package/@openai/codex) |
+| `pi` | `vibepod/pi` | [npm:@earendil-works/pi-coding-agent](https://www.npmjs.com/package/@earendil-works/pi-coding-agent) |
 
 Defaults:
 
@@ -67,8 +69,8 @@ IMAGE_TAG=0.3.0 docker compose push
 Build and push selected targets:
 
 ```bash
-IMAGE_TAG=0.3.0 docker compose build claude gemini codex
-IMAGE_TAG=0.3.0 docker compose push claude gemini codex
+IMAGE_TAG=0.3.0 docker compose build claude gemini codex pi
+IMAGE_TAG=0.3.0 docker compose push claude gemini codex pi
 ```
 
 Claude image note:
