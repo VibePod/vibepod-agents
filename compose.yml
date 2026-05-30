@@ -42,3 +42,9 @@ services:
     build:
       context: ./docker/codex
       dockerfile: Dockerfile
+
+  pi:
+    image: ${AGENT_NAMESPACE:-vibepod}/pi:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/pi
+      dockerfile: Dockerfile

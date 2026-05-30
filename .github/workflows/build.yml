@@ -32,6 +32,7 @@ jobs:
           - auggie
           - copilot
           - codex
+          - pi
 
     steps:
       - name: Checkout
