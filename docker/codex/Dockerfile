@@ -4,6 +4,7 @@ RUN apt-get update && apt-get install -y \
     git \
     ca-certificates \
     bash \
+    socat \
     && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g @openai/codex

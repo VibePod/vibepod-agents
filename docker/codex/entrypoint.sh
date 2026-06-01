@@ -7,6 +7,21 @@ set -e
 USER_UID=${USER_UID:-1000}
 USER_GID=${USER_GID:-1000}
 
+# Codex's OAuth login server binds 127.0.0.1:1455 (loopback only, not
+# configurable), which a published Docker port can't reach. When `vp run codex
+# login` sets VIBEPOD_OAUTH_FORWARD_PORT, bridge that published port to Codex's
+# loopback so the host browser's callback gets through. Uses a port other than
+# 1455 so it never collides with Codex's own bind. Started before the user
+# mapping so it runs regardless of UID (including the root early-exec path).
+if [ -n "$VIBEPOD_OAUTH_FORWARD_PORT" ]; then
+    if command -v socat >/dev/null 2>&1; then
+        socat "TCP-LISTEN:${VIBEPOD_OAUTH_FORWARD_PORT},fork,reuseaddr" \
+            TCP:127.0.0.1:1455 &
+    else
+        echo "warning: VIBEPOD_OAUTH_FORWARD_PORT set but socat is not installed" >&2
+    fi
+fi
+
 if [ "$USER_UID" -eq 0 ]; then
     exec "$@"
 fi
