@@ -4,14 +4,18 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - "agents.json"
       - "docker/**"
+      - "scripts/**"
       - "compose.yml"
       - ".github/workflows/build.yml"
       - ".github/workflows/auto-release.yml"
   push:
     branches: [main]
     paths:
+      - "agents.json"
       - "docker/**"
+      - "scripts/**"
       - "compose.yml"
       - ".github/workflows/build.yml"
       - ".github/workflows/auto-release.yml"
@@ -72,3 +76,12 @@ jobs:
           sbom: false
           no-cache: true
           cache-to: type=gha,mode=max,scope=${{ matrix.target }}
+
+      - name: Smoke test image
+        shell: bash
+        env:
+          AGENT_NAMESPACE: vibepod
+          IMAGE_TAG: ci-smoke
+        run: |
+          set -euo pipefail
+          node scripts/smoke-agent-images.mjs --targets "${{ matrix.target }}" --build

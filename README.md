@@ -26,6 +26,7 @@ scripts/
   bootstrap-wiki.mjs
   check-agent-updates.mjs
   apply-agent-updates.mjs
+  smoke-agent-images.mjs
   lib/
     catalog.mjs
 ```
@@ -73,6 +74,31 @@ IMAGE_TAG=0.3.0 docker compose build claude gemini codex pi
 IMAGE_TAG=0.3.0 docker compose push claude gemini codex pi
 ```
 
+## Smoke Tests
+
+Run smoke tests against already-published images:
+
+```bash
+node scripts/smoke-agent-images.mjs --pull
+```
+
+Build local images and smoke test them:
+
+```bash
+IMAGE_TAG=ci-smoke node scripts/smoke-agent-images.mjs --build
+```
+
+Run one or more selected targets:
+
+```bash
+node scripts/smoke-agent-images.mjs --targets claude,codex --pull
+IMAGE_TAG=ci-smoke node scripts/smoke-agent-images.mjs --targets pi --build
+```
+
+Each target runs a simple argument-forwarding command through the image and the
+catalog `version_command`. If Docker is not installed or the daemon is not
+available, the script prints a `SKIP` message and exits successfully.
+
 Claude image note:
 - `docker/claude` follows the official Claude Code setup via the native installer (`https://claude.ai/install.sh`).
 - Use `CLAUDE_CODE_CHANNEL=stable` (or another supported channel) when building if needed.
@@ -82,6 +108,7 @@ Claude image note:
 - `build.yml`: validates every Docker context on PRs and pushes to `main`
   - multi-arch builds: `linux/amd64`, `linux/arm64`
   - `devstral` is intentionally `linux/amd64` only
+  - each matrix target also builds a local image and runs the smoke test script
 - `auto-release.yml`: checks upstream CLI versions every 6 hours (and on manual dispatch)
   - publishes to Docker Hub namespace `vibepod` (`https://hub.docker.com/u/vibepod`)
   - uses the repository wiki as the source-of-truth state store
