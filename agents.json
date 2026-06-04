@@ -84,6 +84,18 @@
         "enabled": true,
         "source": { "type": "npm", "package": "@openai/codex" }
       }
+    },
+    {
+      "target": "pi",
+      "image_name": "pi",
+      "docker_context": "docker/pi",
+      "dockerfile": "docker/pi/Dockerfile",
+      "version_command": "pi --version",
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "automation": {
+        "enabled": true,
+        "source": { "type": "npm", "package": "@earendil-works/pi-coding-agent" }
+      }
     }
   ]
 }
