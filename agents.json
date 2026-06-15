@@ -96,6 +96,18 @@
         "enabled": true,
         "source": { "type": "npm", "package": "@earendil-works/pi-coding-agent" }
       }
+    },
+    {
+      "target": "agy",
+      "image_name": "agy",
+      "docker_context": "docker/agy",
+      "dockerfile": "docker/agy/Dockerfile",
+      "version_command": "agy --version",
+      "platforms": ["linux/amd64"],
+      "automation": {
+        "enabled": true,
+        "source": { "type": "github_release", "repo": "google-antigravity/antigravity-cli" }
+      }
     }
   ]
 }
