@@ -48,3 +48,9 @@ services:
     build:
       context: ./docker/pi
       dockerfile: Dockerfile
+
+  agy:
+    image: ${AGENT_NAMESPACE:-vibepod}/agy:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/agy
+      dockerfile: Dockerfile

@@ -37,6 +37,7 @@ jobs:
           - copilot
           - codex
           - pi
+          - agy
 
     steps:
       - name: Checkout
@@ -57,7 +58,7 @@ jobs:
           context="docker/${target}"
           file="${context}/Dockerfile"
           platforms="linux/amd64,linux/arm64"
-          if [[ "${target}" == "devstral" || "${target}" == "gemini" ]]; then
+          if [[ "${target}" == "devstral" || "${target}" == "gemini" || "${target}" == "agy" ]]; then
             platforms="linux/amd64"
           fi
 
