@@ -17,6 +17,7 @@ docker/
   copilot/
   codex/
   pi/
+  agy/
 .github/workflows/
   build.yml
   auto-release.yml
@@ -43,6 +44,7 @@ scripts/
 | `copilot` | `vibepod/copilot` | [npm:@github/copilot](https://www.npmjs.com/package/@github/copilot) |
 | `codex` | `vibepod/codex` | [npm:@openai/codex](https://www.npmjs.com/package/@openai/codex) |
 | `pi` | `vibepod/pi` | [npm:@earendil-works/pi-coding-agent](https://www.npmjs.com/package/@earendil-works/pi-coding-agent) |
+| `agy` | `vibepod/agy` | [github:google-antigravity/antigravity-cli](https://github.com/google-antigravity/antigravity-cli/releases/latest) |
 
 Defaults:
 
@@ -70,8 +72,8 @@ IMAGE_TAG=0.3.0 docker compose push
 Build and push selected targets:
 
 ```bash
-IMAGE_TAG=0.3.0 docker compose build claude gemini codex pi
-IMAGE_TAG=0.3.0 docker compose push claude gemini codex pi
+IMAGE_TAG=0.3.0 docker compose build claude gemini codex pi agy
+IMAGE_TAG=0.3.0 docker compose push claude gemini codex pi agy
 ```
 
 ## Smoke Tests
@@ -92,7 +94,7 @@ Run one or more selected targets:
 
 ```bash
 node scripts/smoke-agent-images.mjs --targets claude,codex --pull
-IMAGE_TAG=ci-smoke node scripts/smoke-agent-images.mjs --targets pi --build
+IMAGE_TAG=ci-smoke node scripts/smoke-agent-images.mjs --targets pi,agy --build
 ```
 
 Each target runs a simple argument-forwarding command through the image and the
@@ -107,7 +109,7 @@ Claude image note:
 
 - `build.yml`: validates every Docker context on PRs and pushes to `main`
   - multi-arch builds: `linux/amd64`, `linux/arm64`
-  - `devstral` is intentionally `linux/amd64` only
+  - `devstral` and `agy` are intentionally `linux/amd64` only
   - each matrix target also builds a local image and runs the smoke test script
 - `auto-release.yml`: checks upstream CLI versions every 6 hours (and on manual dispatch)
   - publishes to Docker Hub namespace `vibepod` (`https://hub.docker.com/u/vibepod`)
@@ -151,6 +153,7 @@ git push
 - Current GitHub-release tracked containers:
   - `claude` -> `anthropics/claude-code`
   - `devstral` -> `mistralai/mistral-vibe`
+  - `agy` -> `google-antigravity/antigravity-cli`
 - If you publish manually for Dockerfile/image-only changes, update `tracked.agent_version`, `tracked.image_tag`, and `release_history` in the wiki catalog so automation stays in sync.
 - After manual state changes, re-run bootstrap to regenerate the tracking page (in wiki clone):
 
