@@ -18,6 +18,7 @@ docker/
   codex/
   pi/
   agy/
+  tau/
 .github/workflows/
   build.yml
   auto-release.yml
@@ -45,6 +46,7 @@ scripts/
 | `codex` | `vibepod/codex` | [npm:@openai/codex](https://www.npmjs.com/package/@openai/codex) |
 | `pi` | `vibepod/pi` | [npm:@earendil-works/pi-coding-agent](https://www.npmjs.com/package/@earendil-works/pi-coding-agent) |
 | `agy` | `vibepod/agy` | [github:google-antigravity/antigravity-cli](https://github.com/google-antigravity/antigravity-cli/releases/latest) |
+| `tau` | `vibepod/tau` | [pypi:tau-ai](https://pypi.org/project/tau-ai/) |
 
 Defaults:
 
@@ -149,11 +151,13 @@ git add automation/agent-versions.json Container-Versions.md
 git commit -m "chore: initialize agent version state"
 git push
 ```
-- For fully automated containers (`automation.enabled=true`), the workflow checks upstream sources (npm packages and GitHub releases) and publishes only on version change.
+- For fully automated containers (`automation.enabled=true`), the workflow checks upstream sources (npm packages, PyPI projects and GitHub releases) and publishes only on version change.
 - Current GitHub-release tracked containers:
   - `claude` -> `anthropics/claude-code`
   - `devstral` -> `mistralai/mistral-vibe`
   - `agy` -> `google-antigravity/antigravity-cli`
+- Current PyPI tracked containers:
+  - `tau` -> `tau-ai`
 - If you publish manually for Dockerfile/image-only changes, update `tracked.agent_version`, `tracked.image_tag`, and `release_history` in the wiki catalog so automation stays in sync.
 - After manual state changes, re-run bootstrap to regenerate the tracking page (in wiki clone):
 

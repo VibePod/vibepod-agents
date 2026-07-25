@@ -32,6 +32,13 @@ test("agent catalog lists every compose image target", async () => {
   assert.deepEqual(await readCatalogTargets(), await readComposeServices());
 });
 
+test("Tau Dockerfile pins a fallback version for direct builds", async () => {
+  const dockerfile = await readFile(join(repoRoot, "docker/tau/Dockerfile"), "utf8");
+
+  assert.match(dockerfile, /^ARG TAU_VERSION=\d+\.\d+\.\d+$/m);
+  assert.match(dockerfile, /uv tool install "tau-ai==\$\{TAU_VERSION\}"/);
+});
+
 test("smoke runner skips cleanly when Docker is unavailable", async () => {
   const tempDir = await mkdtemp(join(tmpdir(), "vibepod-agents-smoke-"));
   try {

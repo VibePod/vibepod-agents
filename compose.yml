@@ -54,3 +54,9 @@ services:
     build:
       context: ./docker/agy
       dockerfile: Dockerfile
+
+  tau:
+    image: ${AGENT_NAMESPACE:-vibepod}/tau:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/tau
+      dockerfile: Dockerfile
