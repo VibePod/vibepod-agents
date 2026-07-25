@@ -116,6 +116,7 @@
       "dockerfile": "docker/tau/Dockerfile",
       "version_command": "tau --version",
       "platforms": ["linux/amd64", "linux/arm64"],
+      "version_build_arg": "TAU_VERSION",
       "automation": {
         "enabled": true,
         "source": { "type": "pypi", "package": "tau-ai" }

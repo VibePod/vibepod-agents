@@ -47,6 +47,7 @@ chmod 755 "$HOME" "$HOME/.agents" "$HOME/.agents/skills" 2>/dev/null || true
 chmod 700 "$HOME/.tau" 2>/dev/null || true
 
 if [ -d /workspace ]; then
+    chown "$USER_UID:$USER_GID" /workspace 2>/dev/null || true
     chmod 755 /workspace 2>/dev/null || true
 fi
 

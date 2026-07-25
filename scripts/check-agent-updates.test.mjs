@@ -66,6 +66,7 @@ function makePypiAgent() {
     docker_context: "docker/tau",
     dockerfile: "docker/tau/Dockerfile",
     platforms: ["linux/amd64", "linux/arm64"],
+    version_build_arg: "TAU_VERSION",
     tracked: {
       agent_version: "0.3.3",
       image_tag: "2026.03.1",
@@ -92,6 +93,7 @@ test("planAgentUpdates labels pypi sources", async () => {
   assert.equal(updates.length, 1);
   assert.equal(updates[0].agent_version, "0.4.0");
   assert.equal(updates[0].previous_agent_version, "0.3.3");
+  assert.equal(updates[0].build_args, "TAU_VERSION=0.4.0");
   assert.equal(updates[0].reason, "Upstream pypi:tau-ai updated");
 });
 

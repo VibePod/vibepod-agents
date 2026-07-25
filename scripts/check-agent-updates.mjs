@@ -250,13 +250,18 @@ export async function planAgentUpdates({
       result = `no-latest -> ${nextTag}`;
     }
 
+    const buildArgs = { ...agent.build_args };
+    if (agent.version_build_arg) {
+      buildArgs[agent.version_build_arg] = latestVersion;
+    }
+
     const update = {
       target,
       image_name: agent.image_name,
       docker_context: agent.docker_context,
       dockerfile: agent.dockerfile,
       platforms: (agent.platforms || []).join(","),
-      build_args: formatBuildArgs(agent.build_args),
+      build_args: formatBuildArgs(buildArgs),
       previous_agent_version: trackedVersion,
       agent_version: latestVersion,
       previous_image_tag: agent?.tracked?.image_tag || "",

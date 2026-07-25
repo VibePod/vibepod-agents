@@ -24,7 +24,8 @@ ENV UV_TOOL_DIR=/opt/uv/tools \
 # Containers run a fixed, baked-in version; a new image is published per release.
 ENV TAU_NO_UPDATE_CHECK=1
 
-RUN uv tool install tau-ai \
+ARG TAU_VERSION=0.3.3
+RUN uv tool install "tau-ai==${TAU_VERSION}" \
     && chmod -R a+rX /opt/uv \
     && tau --version
 
