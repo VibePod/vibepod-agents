@@ -30,8 +30,11 @@ fi
 
 GROUP_NAME=${GROUP_NAME:-tau}
 
+# The account's home must be the persisted mount: Tau derives every durable
+# path (credentials.json, providers.json, tui.json, sessions/) from Python's
+# Path.home(), and gosu clears HOME and re-sets it from this passwd entry.
 if ! getent passwd "$USER_UID" >/dev/null 2>&1; then
-    useradd -m -u "$USER_UID" -g "$GROUP_NAME" -d /home/tau -s /bin/sh tau 2>/dev/null || true
+    useradd -u "$USER_UID" -g "$GROUP_NAME" -d "$HOME" -s /bin/sh tau 2>/dev/null || true
     USER_NAME="tau"
 else
     USER_NAME=$(getent passwd "$USER_UID" | cut -d: -f1)
@@ -50,4 +53,7 @@ fi
 export USER="$USER_NAME"
 export LOGNAME="$USER_NAME"
 
-exec gosu "$USER_UID:$USER_GID" "$@"
+# gosu unsets HOME and re-derives it from the passwd entry, which is wrong when
+# the uid already existed in the base image. Re-assert it explicitly; `env` does
+# not re-parse the forwarded argv, so quoted prompts and --flags stay intact.
+exec gosu "$USER_UID:$USER_GID" env HOME="$HOME" "$@"
