@@ -108,6 +108,18 @@
         "enabled": true,
         "source": { "type": "github_release", "repo": "google-antigravity/antigravity-cli" }
       }
+    },
+    {
+      "target": "tau",
+      "image_name": "tau",
+      "docker_context": "docker/tau",
+      "dockerfile": "docker/tau/Dockerfile",
+      "version_command": "tau --version",
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "automation": {
+        "enabled": true,
+        "source": { "type": "pypi", "package": "tau-ai" }
+      }
     }
   ]
 }

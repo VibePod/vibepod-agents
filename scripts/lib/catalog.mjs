@@ -67,6 +67,10 @@ function sourceLabel(agent) {
     const pkg = source.package || "";
     return `[npm:${pkg}](https://www.npmjs.com/package/${pkg})`;
   }
+  if (source.type === "pypi") {
+    const pkg = source.package || "";
+    return `[pypi:${pkg}](https://pypi.org/project/${pkg}/)`;
+  }
   if (source.type === "github_release") {
     const repo = source.repo || "";
     return `[github:${repo}](https://github.com/${repo}/releases/latest)`;

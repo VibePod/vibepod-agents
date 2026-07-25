@@ -38,6 +38,7 @@ jobs:
           - codex
           - pi
           - agy
+          - tau
 
     steps:
       - name: Checkout

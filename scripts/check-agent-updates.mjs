@@ -15,12 +15,13 @@ import {
 function sourceLabel(source) {
   if (!source) return "unknown";
   if (source.type === "npm") return `npm:${source.package}`;
+  if (source.type === "pypi") return `pypi:${source.package}`;
   if (source.type === "github_release") return `github:${source.repo}`;
   if (source.type === "manual") return "manual";
   return source.type || "unknown";
 }
 
-async function fetchLatestVersion(source) {
+export async function fetchLatestVersion(source, fetchImpl = fetch) {
   if (!source || source.type === "manual") {
     return { supported: false, latestVersion: null };
   }
@@ -32,7 +33,7 @@ async function fetchLatestVersion(source) {
 
     const encoded = encodeURIComponent(source.package);
     const url = `https://registry.npmjs.org/${encoded}/latest`;
-    const response = await fetch(url, {
+    const response = await fetchImpl(url, {
       headers: {
         Accept: "application/json",
         "User-Agent": "vibepod-agents-auto-release",
@@ -54,6 +55,36 @@ async function fetchLatestVersion(source) {
     };
   }
 
+  if (source.type === "pypi") {
+    if (!source.package) {
+      throw new Error("Missing pypi package in source config");
+    }
+
+    const encoded = encodeURIComponent(source.package);
+    const url = `https://pypi.org/pypi/${encoded}/json`;
+    const response = await fetchImpl(url, {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": "vibepod-agents-auto-release",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch ${source.package} from PyPI (${response.status})`);
+    }
+
+    const payload = await response.json();
+    const version = payload?.info?.version;
+    if (!version) {
+      throw new Error(`PyPI response missing version for ${source.package}`);
+    }
+
+    return {
+      supported: true,
+      latestVersion: version,
+    };
+  }
+
   if (source.type === "github_release") {
     if (!source.repo) {
       throw new Error("Missing GitHub repository in source config");
@@ -69,7 +100,7 @@ async function fetchLatestVersion(source) {
     }
 
     const url = `https://api.github.com/repos/${source.repo}/releases/latest`;
-    const response = await fetch(url, { headers });
+    const response = await fetchImpl(url, { headers });
     if (!response.ok) {
       throw new Error(
         `Failed to fetch latest GitHub release for ${source.repo} (${response.status})`,
