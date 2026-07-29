@@ -60,3 +60,9 @@ services:
     build:
       context: ./docker/tau
       dockerfile: Dockerfile
+
+  jcode:
+    image: ${AGENT_NAMESPACE:-vibepod}/jcode:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/jcode
+      dockerfile: Dockerfile
