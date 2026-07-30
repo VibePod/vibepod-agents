@@ -94,7 +94,10 @@
       "platforms": ["linux/amd64", "linux/arm64"],
       "automation": {
         "enabled": true,
-        "source": { "type": "npm", "package": "@earendil-works/pi-coding-agent" }
+        "source": {
+          "type": "npm",
+          "package": "@earendil-works/pi-coding-agent"
+        }
       }
     },
     {
@@ -106,7 +109,10 @@
       "platforms": ["linux/amd64"],
       "automation": {
         "enabled": true,
-        "source": { "type": "github_release", "repo": "google-antigravity/antigravity-cli" }
+        "source": {
+          "type": "github_release",
+          "repo": "google-antigravity/antigravity-cli"
+        }
       }
     },
     {

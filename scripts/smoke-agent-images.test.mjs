@@ -1,31 +1,37 @@
-import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 
 async function readComposeServices() {
   const compose = await readFile(join(repoRoot, "compose.yml"), "utf8");
-  return [...compose.matchAll(/^  ([a-z0-9_-]+):$/gm)]
+  return [...compose.matchAll(/^ {2}([a-z0-9_-]+):$/gm)]
     .map((match) => match[1])
     .sort();
 }
 
 async function readCatalogTargets() {
-  const catalog = JSON.parse(await readFile(join(repoRoot, "agents.json"), "utf8"));
+  const catalog = JSON.parse(
+    await readFile(join(repoRoot, "agents.json"), "utf8"),
+  );
   return (catalog.agents || []).map((agent) => agent.target).sort();
 }
 
 function runSmoke(args, env = {}) {
-  return spawnSync(process.execPath, ["scripts/smoke-agent-images.mjs", ...args], {
-    cwd: repoRoot,
-    env: { ...process.env, ...env },
-    encoding: "utf8",
-  });
+  return spawnSync(
+    process.execPath,
+    ["scripts/smoke-agent-images.mjs", ...args],
+    {
+      cwd: repoRoot,
+      env: { ...process.env, ...env },
+      encoding: "utf8",
+    },
+  );
 }
 
 test("agent catalog lists every compose image target", async () => {
@@ -33,7 +39,10 @@ test("agent catalog lists every compose image target", async () => {
 });
 
 test("Tau Dockerfile pins a fallback version for direct builds", async () => {
-  const dockerfile = await readFile(join(repoRoot, "docker/tau/Dockerfile"), "utf8");
+  const dockerfile = await readFile(
+    join(repoRoot, "docker/tau/Dockerfile"),
+    "utf8",
+  );
 
   assert.match(dockerfile, /^ARG TAU_VERSION=\d+\.\d+\.\d+$/m);
   assert.match(dockerfile, /uv tool install "tau-ai==\$\{TAU_VERSION\}"/);
@@ -42,7 +51,9 @@ test("Tau Dockerfile pins a fallback version for direct builds", async () => {
 test("smoke runner skips cleanly when Docker is unavailable", async () => {
   const tempDir = await mkdtemp(join(tmpdir(), "vibepod-agents-smoke-"));
   try {
-    const result = runSmoke(["--targets", "claude", "--skip-build"], { PATH: tempDir });
+    const result = runSmoke(["--targets", "claude", "--skip-build"], {
+      PATH: tempDir,
+    });
 
     assert.equal(result.status, 0, result.stderr);
     assert.match(result.stdout, /SKIP: Docker is not available/);

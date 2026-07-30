@@ -3,9 +3,22 @@
 import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { parseArgs, readJson, renderVersionsMarkdown, writeJson } from "./lib/catalog.mjs";
+import {
+  parseArgs,
+  readJson,
+  renderVersionsMarkdown,
+  writeJson,
+} from "./lib/catalog.mjs";
 
-const MUTABLE_ALIASES = new Set(["latest", "next", "stable", "beta", "alpha", "edge", "main"]);
+const MUTABLE_ALIASES = new Set([
+  "latest",
+  "next",
+  "stable",
+  "beta",
+  "alpha",
+  "edge",
+  "main",
+]);
 
 function isVersionedTag(tag) {
   if (!tag) return false;
@@ -28,12 +41,18 @@ function normalizeIso(value) {
 }
 
 function normalizeAgentVersion(target, rawOutput) {
-  const lines = `${rawOutput || ""}`.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const lines = `${rawOutput || ""}`
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
   if (lines.length === 0) return "";
   let version = "";
   for (const line of lines) {
     const m = line.match(/v?(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)/);
-    if (m) { version = m[1]; break; }
+    if (m) {
+      version = m[1];
+      break;
+    }
   }
   if (!version) return "";
   if (target === "claude" || target === "devstral") {
@@ -64,7 +83,9 @@ async function fetchTagsForAgent(namespace, imageName) {
     for (const item of payload.results || []) {
       tags.push({
         name: item.name,
-        pushed_at: normalizeIso(item.tag_last_pushed || item.last_updated || ""),
+        pushed_at: normalizeIso(
+          item.tag_last_pushed || item.last_updated || "",
+        ),
       });
     }
     nextUrl = payload.next || null;
@@ -78,7 +99,8 @@ function selectTagsForAgent(fetchedTags) {
     .filter((t) => isVersionedTag(t.name))
     .sort((a, b) => (b.pushed_at || "").localeCompare(a.pushed_at || ""));
 
-  if (versioned.length > 0) return { selected: versioned, usingFallback: false };
+  if (versioned.length > 0)
+    return { selected: versioned, usingFallback: false };
 
   // Fallback: non-latest alias tags (e.g. "next") when no versioned tags exist
   const aliases = fetchedTags
@@ -113,7 +135,14 @@ function pullImageIfNeeded(image, pullMode) {
   }
 }
 
-function inspectImageVersion(target, imageName, tag, versionCommand, namespace, pullMode) {
+function inspectImageVersion(
+  target,
+  imageName,
+  tag,
+  versionCommand,
+  namespace,
+  pullMode,
+) {
   const image = `${namespace}/${imageName}:${tag}`;
 
   const pulled = pullImageIfNeeded(image, pullMode);
@@ -130,7 +159,9 @@ function inspectImageVersion(target, imageName, tag, versionCommand, namespace, 
 
     const version = normalizeAgentVersion(target, output);
     if (!version) {
-      console.log(`    [no version detected] ${image}: ${output.trim().slice(0, 80)}`);
+      console.log(
+        `    [no version detected] ${image}: ${output.trim().slice(0, 80)}`,
+      );
       return "unknown";
     }
     return version;
@@ -153,7 +184,9 @@ async function main() {
   const pullMode = args.pull || "if-missing";
 
   if (!["always", "if-missing", "never"].includes(pullMode)) {
-    console.error(`Invalid --pull mode: ${pullMode} (expected always|if-missing|never)`);
+    console.error(
+      `Invalid --pull mode: ${pullMode} (expected always|if-missing|never)`,
+    );
     process.exit(1);
   }
 
@@ -181,7 +214,9 @@ async function main() {
     const allFetchedTags = await fetchTagsForAgent(namespace, imageName);
     const { selected, usingFallback } = selectTagsForAgent(allFetchedTags);
     if (selected.length === 0) {
-      console.warn(`    [warning] No tags found for ${namespace}/${imageName} — agent will have empty history`);
+      console.warn(
+        `    [warning] No tags found for ${namespace}/${imageName} — agent will have empty history`,
+      );
     } else {
       console.log(
         `    ${selected.length} tag(s)${usingFallback ? " (alias fallback)" : ""}`,
@@ -203,12 +238,12 @@ async function main() {
       const imageName = agent.image_name || target;
       const versionCommand = agent.version_command || `${target} --version`;
 
-      const tagsToInspect = allTags
-        ? selected
-        : selected.slice(0, 1); // default: tracked tag only (most recent)
+      const tagsToInspect = allTags ? selected : selected.slice(0, 1); // default: tracked tag only (most recent)
 
       for (const tag of tagsToInspect) {
-        process.stdout.write(`  Inspecting ${namespace}/${imageName}:${tag.name}... `);
+        process.stdout.write(
+          `  Inspecting ${namespace}/${imageName}:${tag.name}... `,
+        );
         const version = inspectImageVersion(
           target,
           imageName,
@@ -241,7 +276,9 @@ async function main() {
     });
 
     // Sort descending by released_at
-    releaseHistory.sort((a, b) => (b.released_at || "").localeCompare(a.released_at || ""));
+    releaseHistory.sort((a, b) =>
+      (b.released_at || "").localeCompare(a.released_at || ""),
+    );
 
     // Determine tracked: most recent selected tag
     const trackedTag = selected[0] || null;

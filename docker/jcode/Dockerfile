@@ -24,6 +24,7 @@ ENV JCODE_NO_AUTO_UPDATE=1 \
 # leading "v" before composing the download URL.
 ARG JCODE_VERSION=0.61.1
 ARG TARGETARCH
+# hadolint ignore=DL3003
 RUN case "${TARGETARCH:-amd64}" in \
         amd64) JCODE_ARCH=x86_64 ;; \
         arm64) JCODE_ARCH=aarch64 ;; \

@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck disable=SC3043  # 'local' is supported by dash/busybox sh
 #
 # Entrypoint script for Claude Code container
 # Handles dynamic UID/GID mapping to match host user

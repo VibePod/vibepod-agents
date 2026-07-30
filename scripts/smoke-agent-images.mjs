@@ -7,7 +7,10 @@ import { parseArgs, readJson } from "./lib/catalog.mjs";
 const DEFAULT_CATALOG = "agents.json";
 const DEFAULT_NAMESPACE = process.env.AGENT_NAMESPACE || "vibepod";
 const DEFAULT_IMAGE_TAG = process.env.IMAGE_TAG || "latest";
-const DEFAULT_TIMEOUT_MS = Number.parseInt(process.env.SMOKE_TIMEOUT_MS || "120000", 10);
+const DEFAULT_TIMEOUT_MS = Number.parseInt(
+  process.env.SMOKE_TIMEOUT_MS || "120000",
+  10,
+);
 const ARG_FORWARDING_COMMAND = ["echo", "vibepod-smoke"];
 
 function splitList(value) {
