@@ -121,6 +121,19 @@
         "enabled": true,
         "source": { "type": "pypi", "package": "tau-ai" }
       }
+    },
+    {
+      "target": "jcode",
+      "image_name": "jcode",
+      "docker_context": "docker/jcode",
+      "dockerfile": "docker/jcode/Dockerfile",
+      "version_command": "jcode --version",
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "version_build_arg": "JCODE_VERSION",
+      "automation": {
+        "enabled": true,
+        "source": { "type": "github_release", "repo": "1jehuang/jcode" }
+      }
     }
   ]
 }

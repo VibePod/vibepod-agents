@@ -39,6 +39,7 @@ jobs:
           - pi
           - agy
           - tau
+          - jcode
 
     steps:
       - name: Checkout

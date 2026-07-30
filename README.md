@@ -19,6 +19,7 @@ docker/
   pi/
   agy/
   tau/
+  jcode/
 .github/workflows/
   build.yml
   auto-release.yml
@@ -47,6 +48,7 @@ scripts/
 | `pi` | `vibepod/pi` | [npm:@earendil-works/pi-coding-agent](https://www.npmjs.com/package/@earendil-works/pi-coding-agent) |
 | `agy` | `vibepod/agy` | [github:google-antigravity/antigravity-cli](https://github.com/google-antigravity/antigravity-cli/releases/latest) |
 | `tau` | `vibepod/tau` | [pypi:tau-ai](https://pypi.org/project/tau-ai/) |
+| `jcode` | `vibepod/jcode` | [github:1jehuang/jcode](https://github.com/1jehuang/jcode/releases/latest) |
 
 Defaults:
 
@@ -156,6 +158,7 @@ git push
   - `claude` -> `anthropics/claude-code`
   - `devstral` -> `mistralai/mistral-vibe`
   - `agy` -> `google-antigravity/antigravity-cli`
+  - `jcode` -> `1jehuang/jcode`
 - Current PyPI tracked containers:
   - `tau` -> `tau-ai`
 - If you publish manually for Dockerfile/image-only changes, update `tracked.agent_version`, `tracked.image_tag`, and `release_history` in the wiki catalog so automation stays in sync.
