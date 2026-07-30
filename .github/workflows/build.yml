@@ -64,9 +64,11 @@ jobs:
             platforms="linux/amd64"
           fi
 
-          echo "context=${context}" >> "${GITHUB_OUTPUT}"
-          echo "file=${file}" >> "${GITHUB_OUTPUT}"
-          echo "platforms=${platforms}" >> "${GITHUB_OUTPUT}"
+          {
+            echo "context=${context}"
+            echo "file=${file}"
+            echo "platforms=${platforms}"
+          } >> "${GITHUB_OUTPUT}"
 
       - name: Build image (no push)
         uses: docker/build-push-action@v6
