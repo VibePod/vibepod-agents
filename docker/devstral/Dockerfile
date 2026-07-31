@@ -1,4 +1,5 @@
 FROM debian:bookworm-slim
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \

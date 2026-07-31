@@ -1,7 +1,10 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
-import { fetchLatestVersion, planAgentUpdates } from "./check-agent-updates.mjs";
+import {
+  fetchLatestVersion,
+  planAgentUpdates,
+} from "./check-agent-updates.mjs";
 
 const checkedAt = "2026-03-25T00:00:00Z";
 
@@ -32,7 +35,10 @@ test("planAgentUpdates skips unchanged latest tags by default", async () => {
     agents: [makeAgent()],
     checkedAt,
     forceRecreateLatest: false,
-    resolveLatestVersion: async () => ({ supported: true, latestVersion: "v1.2.3" }),
+    resolveLatestVersion: async () => ({
+      supported: true,
+      latestVersion: "v1.2.3",
+    }),
     checkLatestTagExists: async () => true,
   });
 
@@ -46,7 +52,10 @@ test("planAgentUpdates creates an update when forceRecreateLatest is enabled", a
     agents: [makeAgent()],
     checkedAt,
     forceRecreateLatest: true,
-    resolveLatestVersion: async () => ({ supported: true, latestVersion: "v1.2.3" }),
+    resolveLatestVersion: async () => ({
+      supported: true,
+      latestVersion: "v1.2.3",
+    }),
     checkLatestTagExists: async () => true,
   });
 
@@ -85,7 +94,10 @@ test("planAgentUpdates labels pypi sources", async () => {
   const { updates, statusRows } = await planAgentUpdates({
     agents: [makePypiAgent()],
     checkedAt,
-    resolveLatestVersion: async () => ({ supported: true, latestVersion: "0.4.0" }),
+    resolveLatestVersion: async () => ({
+      supported: true,
+      latestVersion: "0.4.0",
+    }),
     checkLatestTagExists: async () => true,
   });
 
@@ -108,7 +120,10 @@ test("fetchLatestVersion reads the version from the PyPI JSON API", async () => 
     };
   };
 
-  const resolved = await fetchLatestVersion({ type: "pypi", package: "tau-ai" }, fakeFetch);
+  const resolved = await fetchLatestVersion(
+    { type: "pypi", package: "tau-ai" },
+    fakeFetch,
+  );
 
   assert.deepEqual(resolved, { supported: true, latestVersion: "0.4.0" });
   assert.equal(requested.length, 1);

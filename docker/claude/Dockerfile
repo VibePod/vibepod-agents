@@ -1,5 +1,6 @@
 # Use Debian (glibc). Claude native binaries currently fail on musl/Alpine.
 FROM debian:bookworm-slim
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ARG TZ
 ENV TZ="${TZ:-UTC}"

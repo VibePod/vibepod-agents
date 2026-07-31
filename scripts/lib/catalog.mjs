@@ -112,7 +112,9 @@ export function renderVersionsMarkdown(catalog, generatedAt) {
         const tag = release?.image_tag || "";
         return tag !== "next" && tag !== "latest";
       })
-      .sort((left, right) => (right.released_at || "").localeCompare(left.released_at || ""));
+      .sort((left, right) =>
+        (right.released_at || "").localeCompare(left.released_at || ""),
+      );
 
     const header = `### ${agent.target}`;
     if (releases.length === 0) {
@@ -125,7 +127,10 @@ export function renderVersionsMarkdown(catalog, generatedAt) {
       release.released_at || "",
     ]);
 
-    const table = markdownTable(["Image Tag", "Agent Version", "Released At (UTC)"], rows);
+    const table = markdownTable(
+      ["Image Tag", "Agent Version", "Released At (UTC)"],
+      rows,
+    );
 
     return `${header}\n\n${table}\n`;
   });
@@ -138,7 +143,11 @@ export function renderVersionsMarkdown(catalog, generatedAt) {
       const historyHasNext = (agent.release_history || []).some(
         (release) => (release?.image_tag || "") === "next",
       );
-      return trackedIsNext || historyHasNext || alwaysShowNextTargets.has(agent.target || "");
+      return (
+        trackedIsNext ||
+        historyHasNext ||
+        alwaysShowNextTargets.has(agent.target || "")
+      );
     })
     .map((agent) => [
       agent.target,
@@ -149,7 +158,10 @@ export function renderVersionsMarkdown(catalog, generatedAt) {
 
   const nextTable =
     nextRows.length > 0
-      ? markdownTable(["Container", "Docker Hub", "Next Tag", "Purpose"], nextRows)
+      ? markdownTable(
+          ["Container", "Docker Hub", "Next Tag", "Purpose"],
+          nextRows,
+        )
       : "No `next` images recorded.";
 
   return [

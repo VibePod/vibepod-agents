@@ -1,5 +1,6 @@
 # Use Debian (glibc). Antigravity CLI native binaries require glibc, not musl/Alpine.
 FROM debian:bookworm-slim
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ARG TZ
 ENV TZ="${TZ:-UTC}"

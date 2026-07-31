@@ -41,7 +41,9 @@ export async function fetchLatestVersion(source, fetchImpl = fetch) {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch ${source.package} from npm (${response.status})`);
+      throw new Error(
+        `Failed to fetch ${source.package} from npm (${response.status})`,
+      );
     }
 
     const payload = await response.json();
@@ -70,7 +72,9 @@ export async function fetchLatestVersion(source, fetchImpl = fetch) {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch ${source.package} from PyPI (${response.status})`);
+      throw new Error(
+        `Failed to fetch ${source.package} from PyPI (${response.status})`,
+      );
     }
 
     const payload = await response.json();
@@ -109,7 +113,9 @@ export async function fetchLatestVersion(source, fetchImpl = fetch) {
 
     const payload = await response.json();
     if (!payload.tag_name) {
-      throw new Error(`GitHub release response missing tag_name for ${source.repo}`);
+      throw new Error(
+        `GitHub release response missing tag_name for ${source.repo}`,
+      );
     }
 
     return {
@@ -167,8 +173,9 @@ function appendSummary(summaryPath, report, statusRows) {
     "",
     "| Target | Mode | Source | Tracked | Latest | Result |",
     "| --- | --- | --- | --- | --- | --- |",
-    ...statusRows.map((row) =>
-      `| ${row.target} | ${row.mode} | ${row.source} | ${row.tracked} | ${row.latest} | ${row.result} |`,
+    ...statusRows.map(
+      (row) =>
+        `| ${row.target} | ${row.mode} | ${row.source} | ${row.tracked} | ${row.latest} | ${row.result} |`,
     ),
     "",
   ];
@@ -325,16 +332,24 @@ async function main() {
   if (dryRun) {
     const col = (s, w) => `${s}`.padEnd(w);
     console.log(`\nDry run — checked at ${report.checked_at}`);
-    console.log(`${"Target".padEnd(12)} ${"Tracked".padEnd(16)} ${"Latest".padEnd(16)} Result`);
-    console.log(`${"-".repeat(12)} ${"-".repeat(16)} ${"-".repeat(16)} ${"-".repeat(30)}`);
+    console.log(
+      `${"Target".padEnd(12)} ${"Tracked".padEnd(16)} ${"Latest".padEnd(16)} Result`,
+    );
+    console.log(
+      `${"-".repeat(12)} ${"-".repeat(16)} ${"-".repeat(16)} ${"-".repeat(30)}`,
+    );
     for (const row of statusRows) {
-      console.log(`${col(row.target, 12)} ${col(row.tracked, 16)} ${col(row.latest, 16)} ${row.result}`);
+      console.log(
+        `${col(row.target, 12)} ${col(row.tracked, 16)} ${col(row.latest, 16)} ${row.result}`,
+      );
     }
     console.log();
     if (report.changed) {
       console.log(`${report.updates.length} image(s) would be built:`);
       for (const u of report.updates) {
-        console.log(`  ${u.target}: ${u.previous_agent_version} -> ${u.agent_version}  (image tag: ${u.image_tag}, platforms: ${u.platforms})`);
+        console.log(
+          `  ${u.target}: ${u.previous_agent_version} -> ${u.agent_version}  (image tag: ${u.image_tag}, platforms: ${u.platforms})`,
+        );
       }
     } else {
       console.log("No builds would be triggered.");
@@ -346,7 +361,11 @@ async function main() {
   appendSummary(stepSummary, report, statusRows);
 
   if (githubOutput) {
-    writeGithubOutput(githubOutput, "changed", report.changed ? "true" : "false");
+    writeGithubOutput(
+      githubOutput,
+      "changed",
+      report.changed ? "true" : "false",
+    );
     writeGithubOutput(githubOutput, "updates_count", String(updates.length));
     writeGithubOutput(githubOutput, "checked_at", report.checked_at);
     writeGithubOutput(githubOutput, "matrix", report.matrix);

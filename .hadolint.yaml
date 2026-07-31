@@ -1,0 +1,8 @@
+# Agent images intentionally track the latest CLI releases — version pinning
+# of apt/apk/npm packages defeats the purpose of these containers.
+ignored:
+  - DL3008 # pin apt versions
+  - DL3015 # --no-install-recommends
+  - DL3016 # pin npm versions
+  - DL3018 # pin apk versions
+failure-threshold: warning
