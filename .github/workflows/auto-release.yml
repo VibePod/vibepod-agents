@@ -67,6 +67,7 @@ jobs:
 
           args=(
             --catalog wiki/automation/agent-versions.json
+            --definitions agents.json
             --report wiki/automation/agent-update-report.json
             --github-output "${GITHUB_OUTPUT}"
             --step-summary "${GITHUB_STEP_SUMMARY}"

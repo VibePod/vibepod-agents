@@ -1,12 +1,66 @@
 import assert from "node:assert/strict";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
 
 import {
   fetchLatestVersion,
+  loadAgentCatalog,
+  mergeAgentDefinitions,
   planAgentUpdates,
 } from "./check-agent-updates.mjs";
 
 const checkedAt = "2026-03-25T00:00:00Z";
+
+test("repository definitions supply version build args while wiki supplies release state", async () => {
+  const definitions = [
+    {
+      target: "jcode",
+      image_name: "jcode",
+      docker_context: "docker/jcode",
+      dockerfile: "docker/jcode/Dockerfile",
+      platforms: ["linux/amd64", "linux/arm64"],
+      version_build_arg: "JCODE_VERSION",
+      automation: {
+        enabled: true,
+        source: { type: "github_release", repo: "1jehuang/jcode" },
+      },
+    },
+  ];
+  const wikiAgents = [
+    {
+      target: "jcode",
+      tracked: {
+        agent_version: "v0.61.1",
+        image_tag: "2026.07.1",
+      },
+      release_history: [
+        {
+          agent_version: "v0.61.1",
+          image_tag: "2026.07.1",
+          released_at: "2026-07-29T22:14:30Z",
+        },
+      ],
+    },
+  ];
+
+  const agents = mergeAgentDefinitions(definitions, wikiAgents);
+  const { updates } = await planAgentUpdates({
+    agents,
+    checkedAt,
+    resolveLatestVersion: async () => ({
+      supported: true,
+      latestVersion: "v0.64.2",
+    }),
+    checkLatestTagExists: async () => true,
+  });
+
+  assert.deepEqual(agents[0].tracked, wikiAgents[0].tracked);
+  assert.deepEqual(agents[0].release_history, wikiAgents[0].release_history);
+  assert.equal(updates.length, 1);
+  assert.equal(updates[0].build_args, "JCODE_VERSION=v0.64.2");
+});
 
 function makeAgent() {
   return {
@@ -29,6 +83,67 @@ function makeAgent() {
     },
   };
 }
+
+test("mergeAgentDefinitions rejects wiki targets missing from agents.json", () => {
+  assert.throws(
+    () =>
+      mergeAgentDefinitions(
+        [{ target: "jcode" }],
+        [{ target: "jcode" }, { target: "removed-agent" }],
+      ),
+    /Wiki state contains target missing from agents.json: removed-agent/,
+  );
+});
+
+test("loadAgentCatalog combines repository definitions with wiki state", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "agent-catalog-"));
+  const definitionsPath = join(directory, "agents.json");
+  const statePath = join(directory, "state.json");
+
+  try {
+    await writeFile(
+      definitionsPath,
+      JSON.stringify({
+        agents: [
+          {
+            target: "jcode",
+            version_build_arg: "JCODE_VERSION",
+          },
+        ],
+      }),
+    );
+    await writeFile(
+      statePath,
+      JSON.stringify({
+        agents: [
+          {
+            target: "jcode",
+            tracked: { agent_version: "v0.61.1" },
+          },
+        ],
+      }),
+    );
+
+    const agents = loadAgentCatalog(statePath, definitionsPath);
+
+    assert.equal(agents[0].version_build_arg, "JCODE_VERSION");
+    assert.equal(agents[0].tracked.agent_version, "v0.61.1");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("auto-release passes repository definitions to update detection", async () => {
+  const workflow = await readFile(
+    new URL("../.github/workflows/auto-release.yml", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(
+    workflow,
+    /--catalog wiki\/automation\/agent-versions\.json\s+--definitions agents\.json/,
+  );
+});
 
 test("planAgentUpdates skips unchanged latest tags by default", async () => {
   const { updates, statusRows } = await planAgentUpdates({

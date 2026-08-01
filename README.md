@@ -117,13 +117,15 @@ Claude image note:
   - each matrix target also builds a local image and runs the smoke test script
 - `auto-release.yml`: checks upstream CLI versions every 6 hours (and on manual dispatch)
   - publishes to Docker Hub namespace `vibepod` (`https://hub.docker.com/u/vibepod`)
-  - uses the repository wiki as the source-of-truth state store
+  - uses `agents.json` as the source of truth for image definitions and build configuration
+  - uses the repository wiki as the source-of-truth release state store
   - canonical state file in wiki repo: `automation/agent-versions.json`
   - generated tracking page in wiki repo: `Container-Versions.md`
   - tracking page URL: `https://github.com/VibePod/vibepod-agents/wiki/Container-Versions`
   - CI is update-only (fails if wiki state/page are missing)
   - creates a new image only when tracked upstream version changes
   - manual dispatch supports `force_recreate_latest=true` to rebuild unchanged agents and publish a new dated tag plus `latest`
+  - after fixing a stale image whose tracked version is already current, manually dispatch with `force_recreate_latest=true` so the corrected build configuration is used
   - publishes `<YYYY.MM.N>` and `latest` for changed containers only
   - updates wiki state after a successful publish
 
@@ -136,7 +138,7 @@ Claude image note:
 
 ## Manual Updates And Catalog
 
-The wiki state file `automation/agent-versions.json` is the release catalog used by automation.
+`agents.json` is authoritative for image definitions and build configuration. The wiki state file `automation/agent-versions.json` is authoritative for tracked agent versions and release history. Auto-release merges those sources by target before planning builds.
 
 - One-time local bootstrap of wiki state from Docker Hub:
 ```bash
