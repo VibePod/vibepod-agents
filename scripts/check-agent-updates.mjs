@@ -21,6 +21,44 @@ function sourceLabel(source) {
   return source.type || "unknown";
 }
 
+export function mergeAgentDefinitions(definitions, stateAgents) {
+  const definitionTargets = new Set(
+    definitions.map((definition) => definition.target),
+  );
+  const unknownStateTarget = stateAgents.find(
+    (agent) => !definitionTargets.has(agent.target),
+  );
+  if (unknownStateTarget) {
+    throw new Error(
+      `Wiki state contains target missing from agents.json: ${unknownStateTarget.target}`,
+    );
+  }
+
+  const stateByTarget = new Map(
+    stateAgents.map((agent) => [agent.target, agent]),
+  );
+
+  return definitions.map((definition) => {
+    const state = stateByTarget.get(definition.target);
+    if (!state) return { ...definition };
+
+    return {
+      ...definition,
+      tracked: state.tracked,
+      release_history: state.release_history,
+    };
+  });
+}
+
+export function loadAgentCatalog(catalogPath, definitionsPath) {
+  const stateCatalog = readJson(catalogPath);
+  const stateAgents = stateCatalog.agents || [];
+  if (!definitionsPath) return stateAgents;
+
+  const definitionsCatalog = readJson(definitionsPath);
+  return mergeAgentDefinitions(definitionsCatalog.agents || [], stateAgents);
+}
+
 export async function fetchLatestVersion(source, fetchImpl = fetch) {
   if (!source || source.type === "manual") {
     return { supported: false, latestVersion: null };
@@ -303,8 +341,7 @@ async function main() {
   const forceRecreateLatest =
     args["force-recreate-latest"] === "true" || "force-recreate-latest" in args;
 
-  const catalog = readJson(catalogPath);
-  const agents = catalog.agents || [];
+  const agents = loadAgentCatalog(catalogPath, args.definitions);
 
   const { updates, statusRows } = await planAgentUpdates({
     agents,
