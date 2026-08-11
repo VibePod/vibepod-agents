@@ -153,6 +153,18 @@
         "enabled": true,
         "source": { "type": "npm", "package": "@qwen-code/qwen-code" }
       }
+    },
+    {
+      "target": "freebuff",
+      "image_name": "freebuff",
+      "docker_context": "docker/freebuff",
+      "dockerfile": "docker/freebuff/Dockerfile",
+      "version_command": "freebuff --version",
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "automation": {
+        "enabled": true,
+        "source": { "type": "npm", "package": "freebuff" }
+      }
     }
   ]
 }
