@@ -66,3 +66,9 @@ services:
     build:
       context: ./docker/jcode
       dockerfile: Dockerfile
+
+  qwen:
+    image: ${AGENT_NAMESPACE:-vibepod}/qwen:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/qwen
+      dockerfile: Dockerfile

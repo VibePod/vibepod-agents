@@ -20,6 +20,7 @@ docker/
   agy/
   tau/
   jcode/
+  qwen/
 .github/workflows/
   build.yml
   auto-release.yml
@@ -49,6 +50,7 @@ scripts/
 | `agy` | `vibepod/agy` | [github:google-antigravity/antigravity-cli](https://github.com/google-antigravity/antigravity-cli/releases/latest) |
 | `tau` | `vibepod/tau` | [pypi:tau-ai](https://pypi.org/project/tau-ai/) |
 | `jcode` | `vibepod/jcode` | [github:1jehuang/jcode](https://github.com/1jehuang/jcode/releases/latest) |
+| `qwen` | `vibepod/qwen` | [npm:@qwen-code/qwen-code](https://www.npmjs.com/package/@qwen-code/qwen-code) |
 
 Defaults:
 

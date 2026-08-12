@@ -140,6 +140,18 @@
         "enabled": true,
         "source": { "type": "github_release", "repo": "1jehuang/jcode" }
       }
+    },
+    {
+      "target": "qwen",
+      "image_name": "qwen",
+      "docker_context": "docker/qwen",
+      "dockerfile": "docker/qwen/Dockerfile",
+      "version_command": "qwen --version",
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "automation": {
+        "enabled": true,
+        "source": { "type": "npm", "package": "@qwen-code/qwen-code" }
+      }
     }
   ]
 }
