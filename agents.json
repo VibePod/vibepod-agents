@@ -148,6 +148,7 @@
       "dockerfile": "docker/qwen/Dockerfile",
       "version_command": "qwen --version",
       "platforms": ["linux/amd64", "linux/arm64"],
+      "version_build_arg": "QWEN_VERSION",
       "automation": {
         "enabled": true,
         "source": { "type": "npm", "package": "@qwen-code/qwen-code" }
