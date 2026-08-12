@@ -13,6 +13,8 @@ USER_GID=${USER_GID:-1000}
 QWEN_CONFIG_DIR="${QWEN_CONFIG_DIR:-/qwen}"
 
 mkdir -p "$QWEN_CONFIG_DIR" 2>/dev/null || true
+# Keep the persistent config private (auth tokens, settings, session data).
+chmod 700 "$QWEN_CONFIG_DIR" 2>/dev/null || true
 
 if [ "$USER_UID" -eq 0 ]; then
     # Symlink config dir for root
@@ -59,10 +61,12 @@ chown -h "$USER_UID:$USER_GID" "$USER_HOME/.qwen" 2>/dev/null || true
 # Ensure the persistent config directory is accessible.
 if [ -d "$QWEN_CONFIG_DIR" ]; then
     chown "$USER_UID:$USER_GID" "$QWEN_CONFIG_DIR" 2>/dev/null || true
-    chmod 755 "$QWEN_CONFIG_DIR" 2>/dev/null || true
+    chmod 700 "$QWEN_CONFIG_DIR" 2>/dev/null || true
 fi
 
 if [ -d /workspace ]; then
+    # Give the runtime user write access to the workspace.
+    chown "$USER_UID:$USER_GID" /workspace 2>/dev/null || true
     chmod 755 /workspace 2>/dev/null || true
 fi
 

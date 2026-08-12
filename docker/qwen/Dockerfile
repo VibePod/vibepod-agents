@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Qwen Code CLI (official npm package; binaries are bundled)
-RUN npm install -g @qwen-code/qwen-code
+RUN npm install -g @qwen-code/qwen-code@0.21.10
 
 # Create directories for persistent config and workspace.
 # /qwen is the mount-point VibePod maps to a persistent volume so that
