@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y \
     git \
     ca-certificates \
     bash \
+    gosu \
     && rm -rf /var/lib/apt/lists/*
 
 ARG QWEN_VERSION=0.21.10

@@ -71,5 +71,6 @@ if [ -d /workspace ]; then
 fi
 
 export HOME="$USER_HOME"
+export USER="$USER_NAME"
 export SHELL=/bin/bash
-exec su -s /bin/sh "${USER_NAME}" -c 'exec "$@"' sh "$@"
+exec gosu "$USER_UID:$USER_GID" "$@"
