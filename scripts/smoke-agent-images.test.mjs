@@ -55,7 +55,10 @@ test("Qwen Dockerfile pins a fallback version for direct builds", async () => {
   );
 
   assert.match(dockerfile, /^ARG QWEN_VERSION=\d+\.\d+\.\d+$/m);
-  assert.match(dockerfile, /npm install -g "@qwen-code\/qwen-code@\$\{QWEN_VERSION\}"/);
+  assert.match(
+    dockerfile,
+    /npm install -g "@qwen-code\/qwen-code@\$\{QWEN_VERSION\}"/,
+  );
 });
 
 test("smoke runner skips cleanly when Docker is unavailable", async () => {
