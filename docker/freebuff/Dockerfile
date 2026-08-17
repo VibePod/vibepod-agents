@@ -5,10 +5,13 @@ RUN apt-get update && apt-get install -y \
     git \
     ca-certificates \
     bash \
+    gosu \
     && rm -rf /var/lib/apt/lists/*
 
+ARG FREEBUFF_VERSION=0.0.149
+
 # Install Freebuff CLI (thin npm launcher; downloads native binary on first run)
-RUN npm install -g freebuff
+RUN npm install -g "freebuff@${FREEBUFF_VERSION}"
 
 # Create directories for persistent config and workspace.
 # /freebuff is the mount-point VibePod maps to a persistent volume so that
