@@ -21,6 +21,7 @@ docker/
   tau/
   jcode/
   qwen/
+  freebuff/
 .github/workflows/
   build.yml
   auto-release.yml
@@ -51,6 +52,7 @@ scripts/
 | `tau` | `vibepod/tau` | [pypi:tau-ai](https://pypi.org/project/tau-ai/) |
 | `jcode` | `vibepod/jcode` | [github:1jehuang/jcode](https://github.com/1jehuang/jcode/releases/latest) |
 | `qwen` | `vibepod/qwen` | [npm:@qwen-code/qwen-code](https://www.npmjs.com/package/@qwen-code/qwen-code) |
+| `freebuff` | `vibepod/freebuff` | [npm:freebuff](https://www.npmjs.com/package/freebuff) |
 
 Defaults:
 

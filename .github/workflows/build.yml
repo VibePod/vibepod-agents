@@ -41,6 +41,7 @@ jobs:
           - tau
           - jcode
           - qwen
+          - freebuff
 
     steps:
       - name: Checkout

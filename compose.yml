@@ -72,3 +72,9 @@ services:
     build:
       context: ./docker/qwen
       dockerfile: Dockerfile
+
+  freebuff:
+    image: ${AGENT_NAMESPACE:-vibepod}/freebuff:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/freebuff
+      dockerfile: Dockerfile
