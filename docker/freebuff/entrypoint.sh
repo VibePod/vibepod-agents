@@ -13,8 +13,8 @@ USER_GID=${USER_GID:-1000}
 FREEBUFF_CONFIG_DIR="${FREEBUFF_CONFIG_DIR:-/freebuff}"
 
 mkdir -p "$FREEBUFF_CONFIG_DIR" 2>/dev/null || true
-
-
+# Keep the persistent config private (auth tokens, native binary, session data).
+chmod 700 "$FREEBUFF_CONFIG_DIR" 2>/dev/null || true
 
 if [ "$USER_UID" -eq 0 ]; then
     # Symlink config dir for root
@@ -62,13 +62,16 @@ chown -h "$USER_UID:$USER_GID" "$USER_HOME/.config" "$USER_HOME/.config/manicode
 # Ensure the persistent config directory is accessible.
 if [ -d "$FREEBUFF_CONFIG_DIR" ]; then
     chown "$USER_UID:$USER_GID" "$FREEBUFF_CONFIG_DIR" 2>/dev/null || true
-    chmod 755 "$FREEBUFF_CONFIG_DIR" 2>/dev/null || true
+    chmod 700 "$FREEBUFF_CONFIG_DIR" 2>/dev/null || true
 fi
 
 if [ -d /workspace ]; then
+    # Give the runtime user write access to the workspace.
+    chown "$USER_UID:$USER_GID" /workspace 2>/dev/null || true
     chmod 755 /workspace 2>/dev/null || true
 fi
 
 export HOME="$USER_HOME"
+export USER="$USER_NAME"
 export SHELL=/bin/bash
-exec su -s /bin/sh "${USER_NAME}" -c 'exec "$@"' sh "$@"
+exec gosu "$USER_UID:$USER_GID" "$@"
