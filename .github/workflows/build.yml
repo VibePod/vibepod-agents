@@ -42,6 +42,7 @@ jobs:
           - jcode
           - qwen
           - freebuff
+          - dsh
 
     steps:
       - name: Checkout
