@@ -78,3 +78,9 @@ services:
     build:
       context: ./docker/freebuff
       dockerfile: Dockerfile
+
+  dsh:
+    image: ${AGENT_NAMESPACE:-vibepod}/dsh:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/dsh
+      dockerfile: Dockerfile

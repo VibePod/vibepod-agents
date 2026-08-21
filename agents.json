@@ -166,6 +166,19 @@
         "enabled": true,
         "source": { "type": "npm", "package": "freebuff" }
       }
+    },
+    {
+      "target": "dsh",
+      "image_name": "dsh",
+      "docker_context": "docker/dsh",
+      "dockerfile": "docker/dsh/Dockerfile",
+      "version_command": "dsh --version",
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "version_build_arg": "DSH_VERSION",
+      "automation": {
+        "enabled": true,
+        "source": { "type": "npm", "package": "@deepseek-ai/dsh" }
+      }
     }
   ]
 }
