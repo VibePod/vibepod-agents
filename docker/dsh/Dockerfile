@@ -14,7 +14,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     socat \
     && rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g pnpm
+# dsh's docs assume pnpm >= 10 behavior (allowBuilds), so pin the major.
+RUN npm install -g pnpm@10
 
 # DeepSeek Harness is a developer preview with explicit compatibility-breaking
 # change warnings, so the image pins an exact version; automation bumps it.
@@ -35,6 +36,8 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 
 WORKDIR /workspace
 
+# The socat forwarder's listen port (see entrypoint.sh); dsh itself binds
+# loopback 3080, so this must stay a different port.
 EXPOSE 3081
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

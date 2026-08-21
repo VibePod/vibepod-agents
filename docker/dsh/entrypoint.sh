@@ -16,6 +16,8 @@ mkdir -p "$HOME" "$HOME/.dsh" "$HOME/.agents/skills" /workspace
 # dsh's Web UI binds 127.0.0.1:3080 and intentionally rejects --host 0.0.0.0,
 # but Docker port publishing needs a listener on the bridge interface. When
 # VibePod sets VIBEPOD_WEB_FORWARD_PORT, bridge that port to the loopback UI.
+# The forward port must differ from 3080: TCP-LISTEN binds all interfaces and
+# would collide with dsh's own loopback bind if they matched.
 if [ -n "$VIBEPOD_WEB_FORWARD_PORT" ]; then
     if command -v socat >/dev/null 2>&1; then
         socat "TCP-LISTEN:${VIBEPOD_WEB_FORWARD_PORT},fork,reuseaddr" \
