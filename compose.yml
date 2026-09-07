@@ -84,3 +84,9 @@ services:
     build:
       context: ./docker/dsh
       dockerfile: Dockerfile
+
+  hermes:
+    image: ${AGENT_NAMESPACE:-vibepod}/hermes:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/hermes
+      dockerfile: Dockerfile
