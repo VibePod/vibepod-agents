@@ -179,6 +179,19 @@
         "enabled": true,
         "source": { "type": "npm", "package": "@deepseek-ai/dsh" }
       }
+    },
+    {
+      "target": "hermes",
+      "image_name": "hermes",
+      "docker_context": "docker/hermes",
+      "dockerfile": "docker/hermes/Dockerfile",
+      "version_command": "hermes --version",
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "version_build_arg": "HERMES_VERSION",
+      "automation": {
+        "enabled": true,
+        "source": { "type": "pypi", "package": "hermes-agent" }
+      }
     }
   ]
 }
