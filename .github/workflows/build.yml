@@ -43,6 +43,7 @@ jobs:
           - qwen
           - freebuff
           - dsh
+          - cline
 
     steps:
       - name: Checkout

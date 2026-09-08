@@ -84,3 +84,11 @@ services:
     build:
       context: ./docker/dsh
       dockerfile: Dockerfile
+
+  cline:
+    image: ${AGENT_NAMESPACE:-vibepod}/cline:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/cline
+      dockerfile: Dockerfile
+      args:
+        CLINE_VERSION: ${CLINE_VERSION:-3.0.61}
