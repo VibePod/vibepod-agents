@@ -31,10 +31,16 @@ ENV UV_TOOL_DIR=/opt/uv/tools \
     UV_NO_CACHE=1
 
 # Containers run a fixed, baked-in version; a new image is published per release.
+# The [acp] extra pulls agent-client-protocol, which the bundled `hermes-acp`
+# console script imports at startup — without it `vp run hermes --acp` fails
+# with ModuleNotFoundError: No module named 'acp'. uv links all three of the
+# package's entry points (hermes, hermes-acp, hermes-agent) into
+# UV_TOOL_BIN_DIR, so no extra wiring is needed to put hermes-acp on PATH.
 ARG HERMES_VERSION=0.19.0
-RUN uv tool install "hermes-agent==${HERMES_VERSION}" \
+RUN uv tool install "hermes-agent[acp]==${HERMES_VERSION}" \
     && chmod -R a+rX /opt/uv \
     && hermes --version \
+    && hermes-acp --check \
     && node --version
 
 # Hermes derives every durable path from $HERMES_HOME (config.yaml, .env,

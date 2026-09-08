@@ -17,14 +17,17 @@ TARGET_DIR = "/config/.agents/skills"
 
 
 def main() -> int:
+    """Seed the external skills directory unless the user already set one."""
     from hermes_cli.config import ensure_hermes_home, read_raw_config, save_config
 
     ensure_hermes_home()
 
     raw = read_raw_config() or {}
     skills = raw.get("skills")
-    if isinstance(skills, dict) and skills.get("external_dirs"):
-        # The user configured external skill directories; never overwrite them.
+    # Key presence, not truthiness: `external_dirs: []` is a deliberate "no
+    # external skill directories", and the entrypoint reseeds on every start,
+    # so a falsey check would silently undo that choice on each restart.
+    if isinstance(skills, dict) and "external_dirs" in skills:
         return 0
 
     save_config({"skills": {"external_dirs": [TARGET_DIR]}}, merge_existing=True)
