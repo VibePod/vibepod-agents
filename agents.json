@@ -190,7 +190,10 @@
       "version_build_arg": "HERMES_VERSION",
       "automation": {
         "enabled": true,
-        "source": { "type": "github_release", "repo": "NousResearch/hermes-agent" }
+        "source": {
+          "type": "github_release",
+          "repo": "NousResearch/hermes-agent"
+        }
       }
     }
   ]
