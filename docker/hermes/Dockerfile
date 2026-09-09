@@ -1,66 +1,34 @@
-# Hermes Agent is a pure-Python agent (hermes-agent on PyPI) that requires
-# Python >= 3.11, < 3.14.
-FROM python:3.12-slim
+# Hermes Agent is distributed as an official multi-arch image. Upstream
+# explicitly does NOT support pip/PyPI installs any more — `setup.py` blocks
+# `bdist_wheel`/`sdist` outside a Nix sandbox, and the last PyPI upload (0.19.0,
+# 2026-07-20) predates that cutover. The supported channels are the shell
+# installer, this image, and Nix, so VibePod layers on the published image.
+#
+# Upstream tags are CalVer (`v2026.9.7`); the internal `hermes --version`
+# string (0.21.1) is a separate, decoupled number.
+ARG HERMES_VERSION=v2026.9.7
+FROM nousresearch/hermes-agent:${HERMES_VERSION}
 
-ARG TZ
-ENV TZ="${TZ:-UTC}"
+# The base image owns the process contract: ENTRYPOINT is
+# entrypoint-dispatch.sh, which delegates to s6-overlay's /init, runs
+# /etc/cont-init.d/* in lexicographic order, then execs the CMD through
+# docker/main-wrapper.sh. main-wrapper routes args as:
+#   no args                    -> `hermes`
+#   first arg is an executable -> exec it directly
+#   anything else              -> `hermes <args>`
+# and drops to the unprivileged `hermes` user via s6-setuidgid. VibePod's
+# AgentSpec command (`hermes`, `hermes --yolo -z "<prompt>"`, `hermes-acp`)
+# all take the bare-executable path, so ENTRYPOINT and CMD stay untouched.
+#
+# Do NOT add `USER` or run this image with `docker run --user`: main-wrapper
+# rejects an arbitrary non-hermes UID and exits 1. Host-UID mapping goes
+# through HERMES_UID/HERMES_GID instead, which 00-vibepod-uid supplies below.
 
-# ripgrep powers Hermes' file search; it degrades to `grep` without it, but the
-# fallback is markedly slower on large workspaces.
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    bash \
-    ca-certificates \
-    git \
-    gosu \
-    ripgrep \
-    && rm -rf /var/lib/apt/lists/*
+# VibePod exports USER_UID/USER_GID into every agent container; upstream's
+# stage2 hook reads HERMES_UID/HERMES_GID. This bridges the two before
+# 01-hermes-setup runs (cont-init.d is ordered lexicographically).
+COPY --chmod=0755 cont-init.d/00-vibepod-uid /etc/cont-init.d/00-vibepod-uid
 
-# Hermes' Ink TUI (`hermes --tui`) is a pre-built bundle shipped inside the
-# wheel at hermes_cli/tui_dist/entry.js, so it needs a Node runtime but no npm
-# install. Both images are Debian bookworm, so the copied binary's ABI matches.
-COPY --from=node:22-bookworm-slim /usr/local/bin/node /usr/local/bin/node
-
-# uv installs Hermes into an isolated tool environment and links `hermes` into
-# /usr/local/bin, so the command stays on PATH for whatever HOME the container
-# runs with.
-COPY --from=ghcr.io/astral-sh/uv:0.11.32 /uv /usr/local/bin/uv
-
-ENV UV_TOOL_DIR=/opt/uv/tools \
-    UV_TOOL_BIN_DIR=/usr/local/bin \
-    UV_LINK_MODE=copy \
-    UV_NO_CACHE=1
-
-# Containers run a fixed, baked-in version; a new image is published per release.
-# The [acp] extra pulls agent-client-protocol, which the bundled `hermes-acp`
-# console script imports at startup — without it `vp run hermes --acp` fails
-# with ModuleNotFoundError: No module named 'acp'. uv links all three of the
-# package's entry points (hermes, hermes-acp, hermes-agent) into
-# UV_TOOL_BIN_DIR, so no extra wiring is needed to put hermes-acp on PATH.
-ARG HERMES_VERSION=0.19.0
-RUN uv tool install "hermes-agent[acp]==${HERMES_VERSION}" \
-    && chmod -R a+rX /opt/uv \
-    && hermes --version \
-    && hermes-acp --check \
-    && node --version
-
-# Hermes derives every durable path from $HERMES_HOME (config.yaml, .env,
-# credentials, state.db, skills/, plugins/). It defaults to $HOME/.hermes, but
-# is set explicitly here so the state path survives gosu re-deriving HOME from
-# the passwd entry.
-ENV HOME=/config
-ENV HERMES_HOME=/config/.hermes
-
-# Set a standard terminal type so the REPL and the Ink TUI render correctly.
-ENV TERM=xterm-256color
-
-RUN mkdir -p /config/.hermes /config/.agents/skills /workspace
-
-COPY seed_skills_dir.py /usr/local/lib/vibepod/seed_skills_dir.py
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
-WORKDIR /workspace
-
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-
-CMD ["hermes"]
+# Runs after 01-hermes-setup has seeded config.yaml and chowned the volume.
+COPY seed_skills_dir.py /opt/vibepod/seed_skills_dir.py
+COPY --chmod=0755 cont-init.d/03-vibepod-skills /etc/cont-init.d/03-vibepod-skills

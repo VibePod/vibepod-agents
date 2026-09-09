@@ -1,0 +1,35 @@
+#!/command/with-contenv sh
+# shellcheck shell=sh
+# Bridge VibePod's USER_UID/USER_GID to the HERMES_UID/HERMES_GID that
+# upstream's stage2 hook consumes.
+#
+# VibePod exports USER_UID/USER_GID into every agent container (see
+# core/launch.py::host_identity_env) so files written to the mounted config
+# directory land owned by the host user. Upstream's own knob for that is
+# HERMES_UID/HERMES_GID (or the PUID/PGID aliases), which stage2-hook.sh
+# feeds to usermod/groupmod plus a targeted chown of the data volume.
+#
+# Writing into /run/s6/container_environment is how an s6-overlay cont-init
+# script publishes env to later stages; upstream does the same for
+# AGENT_BROWSER_EXECUTABLE_PATH. This must run before 01-hermes-setup, hence
+# the 00- prefix — /etc/cont-init.d/* is executed in lexicographic order.
+#
+# Never use `docker run --user` for this image instead: main-wrapper.sh exits
+# 1 on an arbitrary non-hermes UID because the bootstrap would be skipped.
+
+set -e
+
+# An explicit HERMES_UID/HERMES_GID (or the PUID/PGID aliases upstream also
+# accepts) is the operator speaking directly to the base image — never
+# override it with VibePod's ambient values.
+if [ -z "${HERMES_UID:-}" ] && [ -z "${PUID:-}" ] && [ -n "${USER_UID:-}" ]; then
+    mkdir -p /run/s6/container_environment
+    printf '%s' "$USER_UID" > /run/s6/container_environment/HERMES_UID
+    echo "[vibepod] mapped USER_UID=$USER_UID -> HERMES_UID"
+fi
+
+if [ -z "${HERMES_GID:-}" ] && [ -z "${PGID:-}" ] && [ -n "${USER_GID:-}" ]; then
+    mkdir -p /run/s6/container_environment
+    printf '%s' "$USER_GID" > /run/s6/container_environment/HERMES_GID
+    echo "[vibepod] mapped USER_GID=$USER_GID -> HERMES_GID"
+fi
