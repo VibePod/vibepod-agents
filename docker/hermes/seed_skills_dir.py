@@ -1,8 +1,10 @@
 """Point Hermes at VibePod's mounted skills directory, once.
 
-Run by the container entrypoint on every start. Adds
-``skills.external_dirs: ["/config/.agents/skills"]`` to Hermes' config.yaml
-when the user has not configured external skill directories themselves.
+Run by the ``03-vibepod-skills`` cont-init hook on every container start.
+Adds ``skills.external_dirs: ["/opt/data/.agents/skills"]`` to Hermes'
+config.yaml when the user has not configured external skill directories
+themselves. ``/opt/data`` is the official image's state volume, which is
+where VibePod mounts the agent's config directory.
 
 Uses hermes_cli.config's public API (``save_config(merge_existing=True)`` is
 upstream's sanctioned partial-save path) so comments in config.yaml survive
@@ -13,7 +15,7 @@ from __future__ import annotations
 
 import sys
 
-TARGET_DIR = "/config/.agents/skills"
+TARGET_DIR = "/opt/data/.agents/skills"
 
 
 def main() -> int:

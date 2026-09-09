@@ -56,7 +56,7 @@ scripts/
 | `qwen` | `vibepod/qwen` | [npm:@qwen-code/qwen-code](https://www.npmjs.com/package/@qwen-code/qwen-code) |
 | `freebuff` | `vibepod/freebuff` | [npm:freebuff](https://www.npmjs.com/package/freebuff) |
 | `dsh` | `vibepod/dsh` | [npm:@deepseek-ai/dsh](https://www.npmjs.com/package/@deepseek-ai/dsh) |
-| `hermes` | `vibepod/hermes` | [pypi:hermes-agent](https://pypi.org/project/hermes-agent/) |
+| `hermes` | `vibepod/hermes` | [docker:nousresearch/hermes-agent](https://hub.docker.com/r/nousresearch/hermes-agent) (tags from [github:NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent/releases/latest)) |
 
 Defaults:
 

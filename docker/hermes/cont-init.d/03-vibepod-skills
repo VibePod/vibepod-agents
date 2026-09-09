@@ -1,0 +1,27 @@
+#!/command/with-contenv sh
+# shellcheck shell=sh
+# Point Hermes at VibePod's mounted skills directory.
+#
+# Hermes discovers external skills only through the `skills.external_dirs`
+# key in its own config.yaml — there is no environment-variable override — so
+# the key has to be seeded. A symlink would be wrong: Hermes *writes* its
+# self-authored skills into $HERMES_HOME/skills/, which would push generated
+# skills into VibePod's curated directory.
+#
+# The 03- prefix puts this after 01-hermes-setup, which seeds config.yaml and
+# chowns the data volume, so the file exists and the write lands with the
+# right owner. s6-setuidgid keeps it owned by the runtime user rather than
+# root (cont-init scripts run as root).
+
+set -e
+
+SEED=/opt/vibepod/seed_skills_dir.py
+PYTHON=/opt/hermes/.venv/bin/python
+
+if [ ! -f "$SEED" ] || [ ! -x "$PYTHON" ]; then
+    exit 0
+fi
+
+# Never fatal: a failure here costs skill discovery, not the session.
+s6-setuidgid hermes "$PYTHON" "$SEED" \
+    || echo "[vibepod] warning: could not seed skills.external_dirs in config.yaml" >&2
