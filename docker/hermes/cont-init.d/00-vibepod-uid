@@ -19,16 +19,27 @@
 
 set -e
 
+# Mirror stage2-hook.sh's validate_uid_gid: it only remaps for 1..65534, so
+# publishing anything else (notably 0 — the image smoke test runs
+# USER_UID=0/USER_GID=0) would be discarded downstream while logging a
+# "mapped" line that did nothing.
+valid_id() {
+    case "$1" in
+        '' | *[!0-9]*) return 1 ;;
+        *) [ "$1" -ge 1 ] && [ "$1" -le 65534 ] ;;
+    esac
+}
+
 # An explicit HERMES_UID/HERMES_GID (or the PUID/PGID aliases upstream also
 # accepts) is the operator speaking directly to the base image — never
 # override it with VibePod's ambient values.
-if [ -z "${HERMES_UID:-}" ] && [ -z "${PUID:-}" ] && [ -n "${USER_UID:-}" ]; then
+if [ -z "${HERMES_UID:-}" ] && [ -z "${PUID:-}" ] && valid_id "${USER_UID:-}"; then
     mkdir -p /run/s6/container_environment
     printf '%s' "$USER_UID" > /run/s6/container_environment/HERMES_UID
     echo "[vibepod] mapped USER_UID=$USER_UID -> HERMES_UID"
 fi
 
-if [ -z "${HERMES_GID:-}" ] && [ -z "${PGID:-}" ] && [ -n "${USER_GID:-}" ]; then
+if [ -z "${HERMES_GID:-}" ] && [ -z "${PGID:-}" ] && valid_id "${USER_GID:-}"; then
     mkdir -p /run/s6/container_environment
     printf '%s' "$USER_GID" > /run/s6/container_environment/HERMES_GID
     echo "[vibepod] mapped USER_GID=$USER_GID -> HERMES_GID"

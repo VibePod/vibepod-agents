@@ -24,6 +24,26 @@ FROM nousresearch/hermes-agent:${HERMES_VERSION}
 # rejects an arbitrary non-hermes UID and exits 1. Host-UID mapping goes
 # through HERMES_UID/HERMES_GID instead, which 00-vibepod-uid supplies below.
 
+# The base image exposes its binaries through
+# ENV PATH="/opt/hermes/bin:/opt/hermes/.venv/bin:...", which a *login* shell
+# discards: `sh -lc` re-reads /etc/profile and resets PATH to the system
+# default. VibePod's image smoke test invokes version_command exactly that way
+# (`sh -lc "hermes --version"`), so link both entry points into /usr/local/bin,
+# which stays on the default PATH. This also keeps a plain
+# `docker exec <c> hermes ...` working from any PATH state.
+#
+# `hermes` deliberately points at upstream's privilege-drop shim rather than
+# the venv binary: invoked as root the shim re-execs the real binary under
+# `s6-setuidgid hermes` so files under $HERMES_HOME stay uid-aligned with the
+# supervised processes, and it short-circuits for non-root callers. It execs
+# the venv binary by absolute path, so it cannot recurse through these links.
+# `hermes-acp` has no shim upstream, so it points at the venv binary.
+#
+# Plain `ln -s` (not `-sf`): if upstream ever ships its own /usr/local/bin
+# entry, the build should fail loudly here rather than silently clobber it.
+RUN ln -s /opt/hermes/bin/hermes /usr/local/bin/hermes && \
+    ln -s /opt/hermes/.venv/bin/hermes-acp /usr/local/bin/hermes-acp
+
 # VibePod exports USER_UID/USER_GID into every agent container; upstream's
 # stage2 hook reads HERMES_UID/HERMES_GID. This bridges the two before
 # 01-hermes-setup runs (cont-init.d is ordered lexicographically).
