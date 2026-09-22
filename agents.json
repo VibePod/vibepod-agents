@@ -195,6 +195,22 @@
           "repo": "NousResearch/hermes-agent"
         }
       }
+    },
+    {
+      "target": "junie",
+      "image_name": "junie",
+      "docker_context": "docker/junie",
+      "dockerfile": "docker/junie/Dockerfile",
+      "version_command": "junie --version",
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "version_build_arg": "JUNIE_VERSION",
+      "automation": {
+        "enabled": true,
+        "source": {
+          "type": "npm",
+          "package": "@jetbrains/junie"
+        }
+      }
     }
   ]
 }

@@ -24,6 +24,7 @@ docker/
   freebuff/
   dsh/
   hermes/
+  junie/
 .github/workflows/
   build.yml
   auto-release.yml
@@ -57,6 +58,7 @@ scripts/
 | `freebuff` | `vibepod/freebuff` | [npm:freebuff](https://www.npmjs.com/package/freebuff) |
 | `dsh` | `vibepod/dsh` | [npm:@deepseek-ai/dsh](https://www.npmjs.com/package/@deepseek-ai/dsh) |
 | `hermes` | `vibepod/hermes` | [docker:nousresearch/hermes-agent](https://hub.docker.com/r/nousresearch/hermes-agent) (tags from [github:NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent/releases/latest)) |
+| `junie` | `vibepod/junie` | [npm:@jetbrains/junie](https://www.npmjs.com/package/@jetbrains/junie) (downloads the matching [github:JetBrains/junie](https://github.com/JetBrains/junie/releases) release zip) |
 
 Defaults:
 
