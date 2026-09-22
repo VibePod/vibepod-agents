@@ -228,6 +228,22 @@
           "pattern": "downloads\\.cursor\\.com/lab/(\\d{4}\\.\\d{2}\\.\\d{2}-[0-9a-f]+)/"
         }
       }
+    },
+    {
+      "target": "junie",
+      "image_name": "junie",
+      "docker_context": "docker/junie",
+      "dockerfile": "docker/junie/Dockerfile",
+      "version_command": "junie --version",
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "version_build_arg": "JUNIE_VERSION",
+      "automation": {
+        "enabled": true,
+        "source": {
+          "type": "npm",
+          "package": "@jetbrains/junie"
+        }
+      }
     }
   ]
 }

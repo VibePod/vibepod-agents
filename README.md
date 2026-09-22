@@ -26,6 +26,7 @@ docker/
   hermes/
   cline/
   cursor/
+  junie/
 .github/workflows/
   build.yml
   auto-release.yml
@@ -61,6 +62,7 @@ scripts/
 | `hermes` | `vibepod/hermes` | [docker:nousresearch/hermes-agent](https://hub.docker.com/r/nousresearch/hermes-agent) (tags from [github:NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent/releases/latest)) |
 | `cline` | `vibepod/cline` | [npm:cline](https://www.npmjs.com/package/cline) |
 | `cursor` | `vibepod/cursor` | [script:cursor.com/install](https://cursor.com/install) |
+| `junie` | `vibepod/junie` | [npm:@jetbrains/junie](https://www.npmjs.com/package/@jetbrains/junie) (downloads the matching [github:JetBrains/junie](https://github.com/JetBrains/junie/releases) release zip) |
 
 Defaults:
 
