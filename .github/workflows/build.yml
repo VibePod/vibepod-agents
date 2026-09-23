@@ -45,6 +45,7 @@ jobs:
           - dsh
           - hermes
           - cline
+          - cursor
 
     steps:
       - name: Checkout
