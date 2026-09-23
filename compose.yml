@@ -90,3 +90,9 @@ services:
     build:
       context: ./docker/hermes
       dockerfile: Dockerfile
+
+  cursor:
+    image: ${AGENT_NAMESPACE:-vibepod}/cursor:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/cursor
+      dockerfile: Dockerfile

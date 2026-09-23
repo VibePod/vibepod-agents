@@ -195,6 +195,23 @@
           "repo": "NousResearch/hermes-agent"
         }
       }
+    },
+    {
+      "target": "cursor",
+      "image_name": "cursor",
+      "docker_context": "docker/cursor",
+      "dockerfile": "docker/cursor/Dockerfile",
+      "version_command": "cursor-agent --version",
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "version_build_arg": "CURSOR_VERSION",
+      "automation": {
+        "enabled": true,
+        "source": {
+          "type": "install_script",
+          "url": "https://cursor.com/install",
+          "pattern": "downloads\\.cursor\\.com/lab/(\\d{4}\\.\\d{2}\\.\\d{2}-[0-9a-f]+)/"
+        }
+      }
     }
   ]
 }
