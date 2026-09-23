@@ -75,6 +75,10 @@ function sourceLabel(agent) {
     const repo = source.repo || "";
     return `[github:${repo}](https://github.com/${repo}/releases/latest)`;
   }
+  if (source.type === "install_script") {
+    const url = source.url || "";
+    return `[script:${url}](${url})`;
+  }
   if (source.type === "manual") {
     return "manual";
   }

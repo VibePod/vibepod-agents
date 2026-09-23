@@ -270,3 +270,64 @@ test("fetchLatestVersion fails loudly for pypi errors", async () => {
     /PyPI response missing version for tau-ai/,
   );
 });
+
+test("fetchLatestVersion reads the version from an install script", async () => {
+  const requested = [];
+  const fakeFetch = async (url) => {
+    requested.push(url);
+    return {
+      ok: true,
+      status: 200,
+      text: async () =>
+        'DOWNLOAD_URL="https://downloads.cursor.com/lab/2026.09.23-86fc751/linux/x64/agent-cli-package.tar.gz"\n',
+    };
+  };
+
+  const resolved = await fetchLatestVersion(
+    {
+      type: "install_script",
+      url: "https://cursor.com/install",
+      pattern:
+        "downloads\\.cursor\\.com/lab/(\\d{4}\\.\\d{2}\\.\\d{2}-[0-9a-f]+)/",
+    },
+    fakeFetch,
+  );
+
+  assert.deepEqual(resolved, {
+    supported: true,
+    latestVersion: "2026.09.23-86fc751",
+  });
+  assert.deepEqual(requested, ["https://cursor.com/install"]);
+});
+
+test("fetchLatestVersion fails loudly for install script errors", async () => {
+  const source = {
+    type: "install_script",
+    url: "https://cursor.com/install",
+    pattern: "lab/([0-9.]+-[0-9a-f]+)/",
+  };
+
+  await assert.rejects(
+    fetchLatestVersion(
+      { type: "install_script", url: source.url },
+      async () => {
+        throw new Error("should not be called");
+      },
+    ),
+    /Missing install script url or pattern/,
+  );
+
+  await assert.rejects(
+    fetchLatestVersion(source, async () => ({ ok: false, status: 503 })),
+    /Failed to fetch install script https:\/\/cursor\.com\/install \(503\)/,
+  );
+
+  await assert.rejects(
+    fetchLatestVersion(source, async () => ({
+      ok: true,
+      status: 200,
+      text: async () => "#!/bin/sh\necho moved\n",
+    })),
+    /does not match/,
+  );
+});
