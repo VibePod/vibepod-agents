@@ -48,8 +48,11 @@ EOF
 # If a proxy CA cert is mounted, append it to the system CA bundle so all
 # HTTPS clients (git, curl, node, etc.) trust traffic through the proxy.
 # Note: path is Debian-specific; update if the base image changes.
+# The bundle is not writable under rootless podman keep-id (USER_UID=0 but the
+# process is unprivileged); skip silently there, clients still trust the proxy
+# via SSL_CERT_FILE and friends.
 setup_proxy_ca() {
-    if [ -n "${SSL_CERT_FILE:-}" ] && [ -f "$SSL_CERT_FILE" ]; then
+    if [ -n "${SSL_CERT_FILE:-}" ] && [ -f "$SSL_CERT_FILE" ] && [ -w /etc/ssl/certs/ca-certificates.crt ]; then
         if ! grep -qF "$(sed -n '2p' "$SSL_CERT_FILE")" /etc/ssl/certs/ca-certificates.crt 2>/dev/null; then
             cat "$SSL_CERT_FILE" >> /etc/ssl/certs/ca-certificates.crt 2>/dev/null || true
         fi
