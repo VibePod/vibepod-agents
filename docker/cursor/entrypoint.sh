@@ -31,7 +31,8 @@ if (config.channel !== "static") {
   config.channel = "static";
   fs.writeFileSync(file, JSON.stringify(config, null, 2) + "\n");
 }
-' "$HOME/.cursor/cli-config.json" || true
+' "$HOME/.cursor/cli-config.json" \
+    || echo "vibepod: warning: could not pin Cursor CLI to the static channel; self-update stays enabled" >&2
 
 if [ "$USER_UID" -eq 0 ]; then
     exec "$@"
