@@ -17,6 +17,7 @@ function sourceLabel(source) {
   if (source.type === "npm") return `npm:${source.package}`;
   if (source.type === "pypi") return `pypi:${source.package}`;
   if (source.type === "github_release") return `github:${source.repo}`;
+  if (source.type === "install_script") return `script:${source.url}`;
   if (source.type === "manual") return "manual";
   return source.type || "unknown";
 }
@@ -159,6 +160,37 @@ export async function fetchLatestVersion(source, fetchImpl = fetch) {
     return {
       supported: true,
       latestVersion: payload.tag_name,
+    };
+  }
+
+  // Vendors that publish neither a package nor GitHub releases (Cursor CLI)
+  // hardcode the current version into their installer script; `pattern` is a
+  // regular expression whose first capture group is that version.
+  if (source.type === "install_script") {
+    if (!source.url || !source.pattern) {
+      throw new Error("Missing install script url or pattern in source config");
+    }
+
+    const response = await fetchImpl(source.url, {
+      headers: { "User-Agent": "vibepod-agents-auto-release" },
+    });
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch install script ${source.url} (${response.status})`,
+      );
+    }
+
+    const script = await response.text();
+    const match = script.match(new RegExp(source.pattern));
+    if (!match?.[1]) {
+      throw new Error(
+        `Install script ${source.url} does not match ${source.pattern}`,
+      );
+    }
+
+    return {
+      supported: true,
+      latestVersion: match[1],
     };
   }
 
