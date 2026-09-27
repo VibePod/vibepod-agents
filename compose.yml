@@ -90,3 +90,9 @@ services:
     build:
       context: ./docker/hermes
       dockerfile: Dockerfile
+
+  junie:
+    image: ${AGENT_NAMESPACE:-vibepod}/junie:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/junie
+      dockerfile: Dockerfile

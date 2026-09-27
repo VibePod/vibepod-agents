@@ -61,6 +61,20 @@ test("Qwen Dockerfile pins a fallback version for direct builds", async () => {
   );
 });
 
+test("Junie Dockerfile pins a fallback version for direct builds", async () => {
+  const dockerfile = await readFile(
+    join(repoRoot, "docker/junie/Dockerfile"),
+    "utf8",
+  );
+
+  assert.match(dockerfile, /^ARG JUNIE_VERSION=\d+\.\d+\.\d+$/m);
+  assert.match(dockerfile, /JUNIE_TAG="\$\{JUNIE_VERSION%\.0\}"/);
+  assert.match(
+    dockerfile,
+    /releases\/download\/\$\{JUNIE_TAG\}\/junie-release-\$\{JUNIE_TAG\}-linux-/,
+  );
+});
+
 test("smoke runner skips cleanly when Docker is unavailable", async () => {
   const tempDir = await mkdtemp(join(tmpdir(), "vibepod-agents-smoke-"));
   try {
