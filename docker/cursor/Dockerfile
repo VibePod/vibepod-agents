@@ -32,6 +32,9 @@ RUN case "${TARGETARCH:-amd64}" in \
     && chmod -R a+rX /opt/cursor-agent \
     # The launcher resolves its own symlink to find the bundled node, so both
     # upstream command names can point at it.
+    # The entrypoint runs the bundled node directly to pin the update channel;
+    # fail the build if the package layout moved it.
+    && test -x /opt/cursor-agent/node \
     && ln -sf /opt/cursor-agent/cursor-agent /usr/local/bin/cursor-agent \
     && ln -sf /opt/cursor-agent/cursor-agent /usr/local/bin/agent \
     && HOME=/tmp/cursor-version cursor-agent --version \
