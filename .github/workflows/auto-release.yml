@@ -166,6 +166,7 @@ jobs:
           set -euo pipefail
           node scripts/apply-agent-updates.mjs \
             --catalog wiki/automation/agent-versions.json \
+            --definitions agents.json \
             --updates-json "${UPDATES_JSON}" \
             --output-page wiki/Container-Versions.md \
             --generated-at "${CHECKED_AT}"
