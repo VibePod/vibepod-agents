@@ -67,6 +67,8 @@ chown "$USER_UID:$USER_GID" "$HOME/.agents" "$HOME/.agents/skills" 2>/dev/null |
 chmod 755 "$HOME" "$HOME/.agents" "$HOME/.agents/skills" 2>/dev/null || true
 # auth.json (access/refresh tokens) lives here; keep the directory private.
 chmod 700 "$HOME/.config/cursor" 2>/dev/null || true
+# Chats, projects and CLI config live here; keep them private too.
+chmod 700 "$HOME/.cursor" 2>/dev/null || true
 
 if [ -d /workspace ]; then
     chown "$USER_UID:$USER_GID" /workspace 2>/dev/null || true
