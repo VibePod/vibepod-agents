@@ -13,7 +13,9 @@ RUN apt-get update && apt-get install -y \
 
 # Install Devstral Vibe CLI and set up PATH
 # The install script exits non-zero when PATH doesn't include ~/.local/bin, so suppress that.
-RUN curl -LsSf https://mistral.ai/vibe/install.sh | bash || true && \
+# Pin uv to Python 3.12 so it picks the prebuilt wheel: with Debian's 3.11 present, uv
+# re-resolves against a downloaded 3.12 and falls back to the sdist, which needs cargo.
+RUN curl -LsSf https://mistral.ai/vibe/install.sh | UV_PYTHON=3.12 bash || true && \
     # Make vibe installation accessible to non-root users
     chmod 755 /root && \
     chmod -R 755 /root/.local && \
