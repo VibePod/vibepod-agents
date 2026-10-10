@@ -61,6 +61,22 @@ test("Qwen Dockerfile pins a fallback version for direct builds", async () => {
   );
 });
 
+test("Cursor Dockerfile pins a fallback version for direct builds", async () => {
+  const dockerfile = await readFile(
+    join(repoRoot, "docker/cursor/Dockerfile"),
+    "utf8",
+  );
+
+  assert.match(
+    dockerfile,
+    /^ARG CURSOR_VERSION=\d{4}\.\d{2}\.\d{2}-[0-9a-f]+$/m,
+  );
+  assert.match(
+    dockerfile,
+    /downloads\.cursor\.com\/lab\/\$\{CURSOR_VERSION\}\/linux\//,
+  );
+});
+
 test("smoke runner skips cleanly when Docker is unavailable", async () => {
   const tempDir = await mkdtemp(join(tmpdir(), "vibepod-agents-smoke-"));
   try {

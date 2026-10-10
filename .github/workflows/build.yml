@@ -44,6 +44,7 @@ jobs:
           - freebuff
           - dsh
           - hermes
+          - cursor
 
     steps:
       - name: Checkout
