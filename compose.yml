@@ -90,3 +90,9 @@ services:
     build:
       context: ./docker/hermes
       dockerfile: Dockerfile
+
+  cline:
+    image: ${AGENT_NAMESPACE:-vibepod}/cline:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/cline
+      dockerfile: Dockerfile

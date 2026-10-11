@@ -24,6 +24,7 @@ docker/
   freebuff/
   dsh/
   hermes/
+  cline/
 .github/workflows/
   build.yml
   auto-release.yml
@@ -57,6 +58,7 @@ scripts/
 | `freebuff` | `vibepod/freebuff` | [npm:freebuff](https://www.npmjs.com/package/freebuff) |
 | `dsh` | `vibepod/dsh` | [npm:@deepseek-ai/dsh](https://www.npmjs.com/package/@deepseek-ai/dsh) |
 | `hermes` | `vibepod/hermes` | [docker:nousresearch/hermes-agent](https://hub.docker.com/r/nousresearch/hermes-agent) (tags from [github:NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent/releases/latest)) |
+| `cline` | `vibepod/cline` | [npm:cline](https://www.npmjs.com/package/cline) |
 
 Defaults:
 

@@ -44,6 +44,7 @@ jobs:
           - freebuff
           - dsh
           - hermes
+          - cline
 
     steps:
       - name: Checkout
