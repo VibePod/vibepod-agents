@@ -270,3 +270,30 @@ test("fetchLatestVersion fails loudly for pypi errors", async () => {
     /PyPI response missing version for tau-ai/,
   );
 });
+
+test("github release lookup retries without token after a 403", async () => {
+  const previousToken = process.env.GITHUB_TOKEN;
+  process.env.GITHUB_TOKEN = "test-token";
+  const calls = [];
+  const fetchImpl = async (_url, { headers }) => {
+    calls.push(headers.Authorization);
+    if (headers.Authorization) return { ok: false, status: 403 };
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({ tag_name: "v3.0.1" }),
+    };
+  };
+
+  try {
+    const result = await fetchLatestVersion(
+      { type: "github_release", repo: "mistralai/mistral-vibe" },
+      fetchImpl,
+    );
+    assert.deepEqual(result, { supported: true, latestVersion: "v3.0.1" });
+    assert.deepEqual(calls, ["Bearer test-token", undefined]);
+  } finally {
+    if (previousToken === undefined) delete process.env.GITHUB_TOKEN;
+    else process.env.GITHUB_TOKEN = previousToken;
+  }
+});

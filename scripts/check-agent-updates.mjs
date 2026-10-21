@@ -142,7 +142,13 @@ export async function fetchLatestVersion(source, fetchImpl = fetch) {
     }
 
     const url = `https://api.github.com/repos/${source.repo}/releases/latest`;
-    const response = await fetchImpl(url, { headers });
+    let response = await fetchImpl(url, { headers });
+    // Orgs with an IP allow list reject authenticated requests from runner
+    // IPs even for public repos, while anonymous requests still succeed.
+    if (response.status === 403 && headers.Authorization) {
+      delete headers.Authorization;
+      response = await fetchImpl(url, { headers });
+    }
     if (!response.ok) {
       throw new Error(
         `Failed to fetch latest GitHub release for ${source.repo} (${response.status})`,
