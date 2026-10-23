@@ -284,7 +284,11 @@ test("fetchLatestVersion retries GitHub releases anonymously when the token is r
         json: async () => ({ message: "IP allow list enabled" }),
       };
     }
-    return { ok: true, status: 200, json: async () => ({ tag_name: "v3.0.2" }) };
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({ tag_name: "v3.0.2" }),
+    };
   };
 
   try {
