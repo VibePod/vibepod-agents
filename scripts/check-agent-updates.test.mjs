@@ -270,3 +270,59 @@ test("fetchLatestVersion fails loudly for pypi errors", async () => {
     /PyPI response missing version for tau-ai/,
   );
 });
+
+test("fetchLatestVersion retries GitHub releases anonymously when the token is rejected", async () => {
+  const previous = process.env.GITHUB_TOKEN;
+  process.env.GITHUB_TOKEN = "ghs_test";
+  const requested = [];
+  const fakeFetch = async (url, options) => {
+    requested.push({ url, options });
+    if (options.headers.Authorization) {
+      return {
+        ok: false,
+        status: 403,
+        json: async () => ({ message: "IP allow list enabled" }),
+      };
+    }
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({ tag_name: "v3.0.2" }),
+    };
+  };
+
+  try {
+    const resolved = await fetchLatestVersion(
+      { type: "github_release", repo: "mistralai/mistral-vibe" },
+      fakeFetch,
+    );
+
+    assert.deepEqual(resolved, { supported: true, latestVersion: "v3.0.2" });
+    assert.equal(requested.length, 2);
+    assert.equal(requested[0].options.headers.Authorization, "Bearer ghs_test");
+    assert.equal(requested[1].options.headers.Authorization, undefined);
+  } finally {
+    if (previous === undefined) delete process.env.GITHUB_TOKEN;
+    else process.env.GITHUB_TOKEN = previous;
+  }
+});
+
+test("fetchLatestVersion includes the GitHub error message on failure", async () => {
+  const previous = process.env.GITHUB_TOKEN;
+  delete process.env.GITHUB_TOKEN;
+  try {
+    await assert.rejects(
+      fetchLatestVersion(
+        { type: "github_release", repo: "mistralai/mistral-vibe" },
+        async () => ({
+          ok: false,
+          status: 403,
+          json: async () => ({ message: "API rate limit exceeded" }),
+        }),
+      ),
+      /mistralai\/mistral-vibe \(403\): API rate limit exceeded/,
+    );
+  } finally {
+    if (previous !== undefined) process.env.GITHUB_TOKEN = previous;
+  }
+});

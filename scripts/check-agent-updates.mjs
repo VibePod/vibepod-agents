@@ -142,10 +142,18 @@ export async function fetchLatestVersion(source, fetchImpl = fetch) {
     }
 
     const url = `https://api.github.com/repos/${source.repo}/releases/latest`;
-    const response = await fetchImpl(url, { headers });
+    let response = await fetchImpl(url, { headers });
+    // Orgs with an IP allow list or token restrictions reject the Actions
+    // token even for public repositories; fall back to anonymous access.
+    if (token && (response.status === 401 || response.status === 403)) {
+      const { Authorization, ...anonymousHeaders } = headers;
+      response = await fetchImpl(url, { headers: anonymousHeaders });
+    }
     if (!response.ok) {
+      const payload = await response.json?.().catch(() => null);
+      const detail = payload?.message ? `: ${payload.message}` : "";
       throw new Error(
-        `Failed to fetch latest GitHub release for ${source.repo} (${response.status})`,
+        `Failed to fetch latest GitHub release for ${source.repo} (${response.status})${detail}`,
       );
     }
 
