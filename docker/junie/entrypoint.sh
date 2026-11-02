@@ -29,6 +29,44 @@ if [ -n "${SSL_CERT_FILE:-}" ] && [ -r "$SSL_CERT_FILE" ] && [ "$(id -u)" -eq 0 
         || echo "junie entrypoint: could not import $SSL_CERT_FILE into the Java trust store" >&2
 fi
 
+# The persisted mount is writable by the runtime user, so a planted symlink
+# could redirect root-owned chown/chmod onto files outside it (for example this
+# entrypoint). Refuse any path that is, or passes through, a symlink below $HOME.
+passes_through_symlink() {
+    _path=$1
+    while :; do
+        if [ -L "$_path" ]; then
+            return 0
+        fi
+        case "$_path" in
+            "$HOME" | / | .) return 1 ;;
+        esac
+        _path=$(dirname "$_path")
+    done
+}
+
+own_paths() {
+    for p in "$@"; do
+        if passes_through_symlink "$p"; then
+            echo "vibepod: warning: not changing ownership of symlinked path $p" >&2
+            continue
+        fi
+        chown -h "$USER_UID:$USER_GID" "$p" 2>/dev/null || true
+    done
+}
+
+set_mode() {
+    mode=$1
+    shift
+    for p in "$@"; do
+        if passes_through_symlink "$p"; then
+            echo "vibepod: warning: not changing permissions of symlinked path $p" >&2
+            continue
+        fi
+        chmod "$mode" "$p" 2>/dev/null || true
+    done
+}
+
 if [ "$USER_UID" -eq 0 ]; then
     exec "$@"
 fi
@@ -56,11 +94,11 @@ else
     USER_NAME=$(getent passwd "$USER_UID" | cut -d: -f1)
 fi
 
-chown "$USER_UID:$USER_GID" "$HOME" "$JUNIE_HOME" "$JUNIE_HOME/skills" 2>/dev/null || true
-chmod 755 "$HOME" "$JUNIE_HOME/skills" 2>/dev/null || true
+own_paths "$HOME" "$JUNIE_HOME" "$JUNIE_HOME/skills"
+set_mode 755 "$HOME" "$JUNIE_HOME/skills"
 # Junie stores API keys and OAuth tokens in $JUNIE_HOME/secure_credentials.json
 # when no Secret Service is reachable (always, in this image); keep it private.
-chmod 700 "$JUNIE_HOME" 2>/dev/null || true
+set_mode 700 "$JUNIE_HOME"
 
 if [ -d /workspace ]; then
     chown "$USER_UID:$USER_GID" /workspace 2>/dev/null || true
