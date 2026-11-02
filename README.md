@@ -25,6 +25,7 @@ docker/
   dsh/
   hermes/
   cline/
+  cursor/
 .github/workflows/
   build.yml
   auto-release.yml
@@ -59,6 +60,7 @@ scripts/
 | `dsh` | `vibepod/dsh` | [npm:@deepseek-ai/dsh](https://www.npmjs.com/package/@deepseek-ai/dsh) |
 | `hermes` | `vibepod/hermes` | [docker:nousresearch/hermes-agent](https://hub.docker.com/r/nousresearch/hermes-agent) (tags from [github:NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent/releases/latest)) |
 | `cline` | `vibepod/cline` | [npm:cline](https://www.npmjs.com/package/cline) |
+| `cursor` | `vibepod/cursor` | [script:cursor.com/install](https://cursor.com/install) |
 
 Defaults:
 
@@ -165,7 +167,7 @@ git add automation/agent-versions.json Container-Versions.md
 git commit -m "chore: initialize agent version state"
 git push
 ```
-- For fully automated containers (`automation.enabled=true`), the workflow checks upstream sources (npm packages, PyPI projects and GitHub releases) and publishes only on version change.
+- For fully automated containers (`automation.enabled=true`), the workflow checks upstream sources (npm packages, PyPI projects, GitHub releases and vendor install scripts) and publishes only on version change.
 - Current GitHub-release tracked containers:
   - `claude` -> `anthropics/claude-code`
   - `devstral` -> `mistralai/mistral-vibe`
@@ -173,6 +175,8 @@ git push
   - `jcode` -> `1jehuang/jcode`
 - Current PyPI tracked containers:
   - `tau` -> `tau-ai`
+- Current install-script tracked containers (version parsed from the vendor installer):
+  - `cursor` -> `https://cursor.com/install`
 - If you publish manually for Dockerfile/image-only changes, update `tracked.agent_version`, `tracked.image_tag`, and `release_history` in the wiki catalog so automation stays in sync.
 - After manual state changes, re-run bootstrap to regenerate the tracking page (in wiki clone):
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   nowUtcIso,
   parseArgs,
@@ -49,27 +51,36 @@ function upsertReleaseHistory(agent, releaseEntry) {
   );
 }
 
-function main() {
-  const args = parseArgs(process.argv);
-  const catalogPath = args.catalog || "agents.json";
-  const outputCatalog = args["output-catalog"] || catalogPath;
-  const outputPage = args["output-page"] || "wiki/Container-Versions.md";
-  const generatedAt = args["generated-at"] || nowUtcIso();
-
-  const updates = ensureArray(normalizeUpdates(args), "updates");
-  const catalog = readJson(catalogPath);
+export function applyAgentUpdates({
+  catalog,
+  updates,
+  definitions = [],
+  generatedAt,
+}) {
   const agents = ensureArray(catalog.agents || [], "catalog.agents");
+  catalog.agents = agents;
 
   const agentByTarget = new Map(agents.map((agent) => [agent.target, agent]));
+  const definitionByTarget = new Map(
+    definitions.map((definition) => [definition.target, definition]),
+  );
 
   for (const update of updates) {
     if (!update?.target) {
       throw new Error("Each update requires a target");
     }
 
-    const agent = agentByTarget.get(update.target);
+    let agent = agentByTarget.get(update.target);
     if (!agent) {
-      throw new Error(`Unknown target in updates: ${update.target}`);
+      // A target newly added to agents.json has no wiki state yet; seed it
+      // from the repository definition so its first release is recorded.
+      const definition = definitionByTarget.get(update.target);
+      if (!definition) {
+        throw new Error(`Unknown target in updates: ${update.target}`);
+      }
+      agent = { ...definition, tracked: {}, release_history: [] };
+      agents.push(agent);
+      agentByTarget.set(update.target, agent);
     }
 
     if (!agent.tracked || typeof agent.tracked !== "object") {
@@ -90,6 +101,24 @@ function main() {
     });
   }
 
+  return catalog;
+}
+
+function main() {
+  const args = parseArgs(process.argv);
+  const catalogPath = args.catalog || "agents.json";
+  const outputCatalog = args["output-catalog"] || catalogPath;
+  const outputPage = args["output-page"] || "wiki/Container-Versions.md";
+  const generatedAt = args["generated-at"] || nowUtcIso();
+
+  const updates = ensureArray(normalizeUpdates(args), "updates");
+  const catalog = readJson(catalogPath);
+  const definitions = args.definitions
+    ? ensureArray(readJson(args.definitions).agents || [], "definitions.agents")
+    : [];
+
+  applyAgentUpdates({ catalog, updates, definitions, generatedAt });
+
   writeJson(outputCatalog, catalog);
 
   const markdown = renderVersionsMarkdown(catalog, generatedAt);
@@ -100,4 +129,9 @@ function main() {
   console.log(`Wrote ${outputPage}`);
 }
 
-main();
+const invokedPath = process.argv[1] ? path.resolve(process.argv[1]) : "";
+const currentScriptPath = fileURLToPath(import.meta.url);
+
+if (invokedPath === currentScriptPath) {
+  main();
+}
