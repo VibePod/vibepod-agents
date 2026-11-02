@@ -13,6 +13,7 @@ const SYSTEM_BUNDLE = "/etc/ssl/certs/ca-certificates.crt";
 const ENTRYPOINTS_WITH_PROXY_CA = [
   "docker/claude/entrypoint.sh",
   "docker/agy/entrypoint.sh",
+  "docker/cline/entrypoint.sh",
 ];
 
 const FAKE_CERT = [

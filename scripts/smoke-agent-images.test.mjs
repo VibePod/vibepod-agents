@@ -61,6 +61,17 @@ test("Qwen Dockerfile pins a fallback version for direct builds", async () => {
   );
 });
 
+test("Cline Dockerfile pins a fallback version for direct builds", async () => {
+  const dockerfile = await readFile(
+    join(repoRoot, "docker/cline/Dockerfile"),
+    "utf8",
+  );
+
+  assert.match(dockerfile, /^ARG CLINE_VERSION=\d+\.\d+\.\d+$/m);
+  assert.match(dockerfile, /npm install -g "cline@\$\{CLINE_VERSION\}"/);
+  assert.match(dockerfile, /^ENV CLINE_NO_AUTO_UPDATE=1$/m);
+});
+
 test("smoke runner skips cleanly when Docker is unavailable", async () => {
   const tempDir = await mkdtemp(join(tmpdir(), "vibepod-agents-smoke-"));
   try {
