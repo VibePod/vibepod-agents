@@ -46,6 +46,7 @@ jobs:
           - hermes
           - cline
           - cursor
+          - junie
 
     steps:
       - name: Checkout

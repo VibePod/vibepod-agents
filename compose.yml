@@ -102,3 +102,9 @@ services:
     build:
       context: ./docker/cursor
       dockerfile: Dockerfile
+
+  junie:
+    image: ${AGENT_NAMESPACE:-vibepod}/junie:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/junie
+      dockerfile: Dockerfile
