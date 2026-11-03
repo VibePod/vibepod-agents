@@ -61,7 +61,7 @@ export function dockerTagLink(agent, tag) {
   return `[${tag}](https://hub.docker.com/r/${repo}/tags?name=${encodeURIComponent(tag)})`;
 }
 
-function sourceLabel(agent) {
+export function sourceLabel(agent) {
   const source = agent?.automation?.source || {};
   if (source.type === "npm") {
     const pkg = source.package || "";

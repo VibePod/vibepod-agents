@@ -1,1 +1,1 @@
-Claude Code in a container — Debian Bookworm, multi-arch (amd64/arm64), dynamic UID/GID mapping
+Claude Code in a container, Debian slim, native installer, runs as your host user

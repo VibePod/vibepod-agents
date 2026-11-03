@@ -1,28 +1,7 @@
-# vibepod/auggie
+[Auggie](https://www.npmjs.com/package/@augmentcode/auggie), the Augment Code coding agent CLI, packaged as a container image.
 
-[Augment Code CLI](https://www.augmentcode.com) — Augment's official AI coding CLI — in a container.
+## Image
 
-Built on **Node.js 22 Debian Slim**. Available for `linux/amd64` and `linux/arm64`.
-
-## Features
-
-- Dynamic UID/GID mapping — runs as your host user, not root
-- Includes: `git`, `ca-certificates`
-
-## Tags
-
-Tags follow `YYYY.MM.N` (e.g. `2026.03.1`) plus `latest`.
-
-## Usage
-
-```bash
-docker run -it --rm \
-  -e USER_UID=$(id -u) \
-  -e USER_GID=$(id -g) \
-  -v $(pwd):/workspace \
-  vibepod/auggie
-```
-
-## Source
-
-[github.com/VibePod/vibepod-agents](https://github.com/VibePod/vibepod-agents)
+- Node.js 22 Debian slim base, installed from npm
+- Runs as your host user through `USER_UID`/`USER_GID` mapping
+- Includes `git`

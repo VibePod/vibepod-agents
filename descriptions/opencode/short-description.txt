@@ -1,1 +1,1 @@
-Opencode AI in a container — Node.js Debian Slim, multi-arch (amd64/arm64), UID/GID mapping
+OpenCode in a container, Node.js 22 slim, runs as your host user

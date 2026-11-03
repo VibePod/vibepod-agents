@@ -1,0 +1,1 @@
+Cursor CLI (cursor-agent) in a container, Debian slim, runs as your host user

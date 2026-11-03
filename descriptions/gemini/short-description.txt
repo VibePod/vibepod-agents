@@ -1,1 +1,1 @@
-Gemini CLI in a container — Node.js Alpine, multi-arch (amd64/arm64), dynamic UID/GID mapping
+Gemini CLI in a container, Node.js 22 Alpine, runs as your host user

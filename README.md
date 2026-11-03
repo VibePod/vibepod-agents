@@ -27,15 +27,22 @@ docker/
   cline/
   cursor/
   junie/
+descriptions/
+  <target>/
+    overview.md
+    short-description.txt
 .github/workflows/
   build.yml
   auto-release.yml
+  hub-descriptions.yml
 automation/
   agent-versions.json
 scripts/
   bootstrap-wiki.mjs
   check-agent-updates.mjs
   apply-agent-updates.mjs
+  generate-hub-descriptions.mjs
+  push-hub-descriptions.mjs
   smoke-agent-images.mjs
   lib/
     catalog.mjs
@@ -142,6 +149,19 @@ Claude image note:
   - after fixing a stale image whose tracked version is already current, manually dispatch with `force_recreate_latest=true` so the corrected build configuration is used
   - publishes `<YYYY.MM.N>` and `latest` for changed containers only
   - updates wiki state after a successful publish
+  - refreshes every Docker Hub description after a successful publish
+- `hub-descriptions.yml`: pushes Docker Hub descriptions when `descriptions/`, `agents.json` or the description scripts change on `main` (and on manual dispatch, optionally limited to `targets`)
+
+## Docker Hub Descriptions
+
+Each target has a hand-written `descriptions/<target>/short-description.txt` (at most 100 characters) and `descriptions/<target>/overview.md` (intro and image notes). `scripts/generate-hub-descriptions.mjs` wraps the overview with usage, platforms and tags from `agents.json` plus the ten most recent releases from the wiki state, and writes the result to `reports/hub-descriptions/`. `scripts/push-hub-descriptions.mjs` uploads it with the `DOCKERHUB_USERNAME`/`DOCKERHUB_TOKEN` secrets; repositories that are not published yet are skipped.
+
+```bash
+node scripts/generate-hub-descriptions.mjs --catalog wiki/automation/agent-versions.json
+DOCKERHUB_USERNAME=... DOCKERHUB_TOKEN=... node scripts/push-hub-descriptions.mjs --targets claude
+```
+
+When adding an agent, add its `descriptions/<target>/` files too; the test suite fails if any target in `agents.json` lacks them.
 
 ## Versioning Rules
 

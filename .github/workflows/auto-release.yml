@@ -189,3 +189,23 @@ jobs:
           git add automation/agent-versions.json Container-Versions.md
           git commit -m "chore: update container version state (${CHECKED_AT})"
           git push
+
+      - name: Generate Docker Hub descriptions
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/generate-hub-descriptions.mjs \
+            --catalog wiki/automation/agent-versions.json \
+            --definitions agents.json \
+            --output reports/hub-descriptions
+
+      - name: Update Docker Hub descriptions
+        shell: bash
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          node scripts/push-hub-descriptions.mjs \
+            --definitions agents.json \
+            --output reports/hub-descriptions
