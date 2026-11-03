@@ -1,0 +1,1 @@
+GitHub Copilot CLI in a container, Node.js 22 slim, runs as your host user

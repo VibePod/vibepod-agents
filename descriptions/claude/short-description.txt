@@ -1,0 +1,1 @@
+Claude Code in a container, Debian slim, native installer, runs as your host user

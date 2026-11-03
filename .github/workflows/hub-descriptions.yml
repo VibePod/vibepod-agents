@@ -1,0 +1,75 @@
+name: Update Docker Hub Descriptions
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - agents.json
+      - descriptions/**
+      - scripts/generate-hub-descriptions.mjs
+      - scripts/push-hub-descriptions.mjs
+  workflow_dispatch:
+    inputs:
+      targets:
+        description: "Comma-separated targets to update (empty updates all)"
+        required: false
+        type: string
+        default: ""
+
+concurrency:
+  group: hub-descriptions
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Clone wiki repository
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git clone --depth 1 \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git" \
+            wiki
+
+      - name: Generate Docker Hub descriptions
+        shell: bash
+        env:
+          TARGETS: ${{ inputs.targets }}
+        run: |
+          set -euo pipefail
+          args=(
+            --catalog wiki/automation/agent-versions.json
+            --definitions agents.json
+            --output reports/hub-descriptions
+          )
+          if [[ -n "${TARGETS:-}" ]]; then
+            args+=(--targets "${TARGETS}")
+          fi
+          node scripts/generate-hub-descriptions.mjs "${args[@]}"
+
+      - name: Update Docker Hub descriptions
+        shell: bash
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          TARGETS: ${{ inputs.targets }}
+        run: |
+          set -euo pipefail
+          args=(
+            --definitions agents.json
+            --output reports/hub-descriptions
+          )
+          if [[ -n "${TARGETS:-}" ]]; then
+            args+=(--targets "${TARGETS}")
+          fi
+          node scripts/push-hub-descriptions.mjs "${args[@]}"

@@ -1,0 +1,1 @@
+jcode coding agent in a container, Debian trixie slim, runs as your host user

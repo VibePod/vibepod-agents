@@ -1,0 +1,1 @@
+Mistral Vibe (Devstral) CLI in a container, Debian slim, amd64

@@ -1,0 +1,1 @@
+JetBrains Junie CLI in a container, Debian trixie slim, runs as your host user
