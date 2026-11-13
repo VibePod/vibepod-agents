@@ -244,6 +244,23 @@
           "package": "@jetbrains/junie"
         }
       }
+    },
+    {
+      "target": "warp",
+      "image_name": "warp",
+      "docker_context": "docker/warp",
+      "dockerfile": "docker/warp/Dockerfile",
+      "version_command": "warp --version",
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "version_build_arg": "WARP_VERSION",
+      "automation": {
+        "enabled": true,
+        "source": {
+          "type": "redirect",
+          "url": "https://app.warp.dev/download/agent-cli/artifact?os=linux&arch=x86_64",
+          "pattern": "releases\\.warp\\.dev/stable/([A-Za-z0-9._-]+)/tui/"
+        }
+      }
     }
   ]
 }
