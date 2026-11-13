@@ -27,6 +27,7 @@ docker/
   cline/
   cursor/
   junie/
+  warp/
 .github/workflows/
   build.yml
   auto-release.yml
@@ -63,6 +64,7 @@ scripts/
 | `cline` | `vibepod/cline` | [npm:cline](https://www.npmjs.com/package/cline) |
 | `cursor` | `vibepod/cursor` | [script:cursor.com/install](https://cursor.com/install) |
 | `junie` | `vibepod/junie` | [npm:@jetbrains/junie](https://www.npmjs.com/package/@jetbrains/junie) (downloads the matching [github:JetBrains/junie](https://github.com/JetBrains/junie/releases) release zip) |
+| `warp` | `vibepod/warp` | [redirect:app.warp.dev/download/agent-cli/artifact](https://app.warp.dev/download/agent-cli/artifact?os=linux&arch=x86_64) |
 
 Defaults:
 
@@ -169,7 +171,7 @@ git add automation/agent-versions.json Container-Versions.md
 git commit -m "chore: initialize agent version state"
 git push
 ```
-- For fully automated containers (`automation.enabled=true`), the workflow checks upstream sources (npm packages, PyPI projects, GitHub releases and vendor install scripts) and publishes only on version change.
+- For fully automated containers (`automation.enabled=true`), the workflow checks upstream sources (npm packages, PyPI projects, GitHub releases, vendor install scripts and vendor download redirects) and publishes only on version change.
 - Current GitHub-release tracked containers:
   - `claude` -> `anthropics/claude-code`
   - `devstral` -> `mistralai/mistral-vibe`
@@ -179,6 +181,8 @@ git push
   - `tau` -> `tau-ai`
 - Current install-script tracked containers (version parsed from the vendor installer):
   - `cursor` -> `https://cursor.com/install`
+- Current redirect tracked containers (version parsed from the redirect target of the vendor download endpoint):
+  - `warp` -> `https://app.warp.dev/download/agent-cli/artifact`
 - If you publish manually for Dockerfile/image-only changes, update `tracked.agent_version`, `tracked.image_tag`, and `release_history` in the wiki catalog so automation stays in sync.
 - After manual state changes, re-run bootstrap to regenerate the tracking page (in wiki clone):
 

@@ -18,6 +18,7 @@ function sourceLabel(source) {
   if (source.type === "pypi") return `pypi:${source.package}`;
   if (source.type === "github_release") return `github:${source.repo}`;
   if (source.type === "install_script") return `script:${source.url}`;
+  if (source.type === "redirect") return `redirect:${source.url}`;
   if (source.type === "manual") return "manual";
   return source.type || "unknown";
 }
@@ -193,6 +194,39 @@ export async function fetchLatestVersion(source, fetchImpl = fetch) {
     if (!match?.[1]) {
       throw new Error(
         `Install script ${source.url} does not match ${source.pattern}`,
+      );
+    }
+
+    return {
+      supported: true,
+      latestVersion: match[1],
+    };
+  }
+
+  // Vendors whose installer resolves the current version at run time (Warp
+  // Agent CLI) expose it only in the redirect of a download endpoint;
+  // `pattern` is a regular expression matched against the Location header
+  // whose first capture group is that version.
+  if (source.type === "redirect") {
+    if (!source.url || !source.pattern) {
+      throw new Error("Missing redirect url or pattern in source config");
+    }
+
+    const response = await fetchImpl(source.url, {
+      redirect: "manual",
+      headers: { "User-Agent": "vibepod-agents-auto-release" },
+    });
+    const location = response.headers?.get?.("location") || "";
+    if (response.status < 300 || response.status >= 400 || !location) {
+      throw new Error(
+        `Expected a redirect from ${source.url} (${response.status})`,
+      );
+    }
+
+    const match = location.match(new RegExp(source.pattern));
+    if (!match?.[1]) {
+      throw new Error(
+        `Redirect target of ${source.url} does not match ${source.pattern}`,
       );
     }
 

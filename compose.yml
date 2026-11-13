@@ -108,3 +108,9 @@ services:
     build:
       context: ./docker/junie
       dockerfile: Dockerfile
+
+  warp:
+    image: ${AGENT_NAMESPACE:-vibepod}/warp:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/warp
+      dockerfile: Dockerfile
