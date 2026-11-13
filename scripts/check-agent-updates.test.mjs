@@ -387,3 +387,78 @@ test("fetchLatestVersion fails loudly for install script errors", async () => {
     /does not match/,
   );
 });
+
+test("fetchLatestVersion reads the version from a download redirect", async () => {
+  const requested = [];
+  const fakeFetch = async (url, options) => {
+    requested.push([url, options.redirect]);
+    return {
+      ok: false,
+      status: 302,
+      headers: new Headers({
+        location:
+          "https://releases.warp.dev/stable/v0.2026.11.11.08.17.stable_01/tui/linux/x86_64/warp-tui-stable-linux-x86_64.tar.gz",
+      }),
+    };
+  };
+  const url =
+    "https://app.warp.dev/download/agent-cli/artifact?os=linux&arch=x86_64";
+
+  const resolved = await fetchLatestVersion(
+    {
+      type: "redirect",
+      url,
+      pattern: "releases\\.warp\\.dev/stable/([A-Za-z0-9._-]+)/tui/",
+    },
+    fakeFetch,
+  );
+
+  assert.deepEqual(resolved, {
+    supported: true,
+    latestVersion: "v0.2026.11.11.08.17.stable_01",
+  });
+  // The redirect must not be followed: the version is only in its target.
+  assert.deepEqual(requested, [[url, "manual"]]);
+});
+
+test("fetchLatestVersion fails loudly for download redirect errors", async () => {
+  const source = {
+    type: "redirect",
+    url: "https://app.warp.dev/download/agent-cli/artifact?os=linux&arch=x86_64",
+    pattern: "stable/([A-Za-z0-9._-]+)/tui/",
+  };
+
+  await assert.rejects(
+    fetchLatestVersion({ type: "redirect", url: source.url }, async () => {
+      throw new Error("should not be called");
+    }),
+    /Missing redirect url or pattern/,
+  );
+
+  await assert.rejects(
+    fetchLatestVersion(source, async () => ({
+      ok: true,
+      status: 200,
+      headers: new Headers(),
+    })),
+    /Expected a redirect from https:\/\/app\.warp\.dev\/\S+ \(200\)/,
+  );
+
+  await assert.rejects(
+    fetchLatestVersion(source, async () => ({
+      ok: false,
+      status: 302,
+      headers: new Headers(),
+    })),
+    /Expected a redirect from/,
+  );
+
+  await assert.rejects(
+    fetchLatestVersion(source, async () => ({
+      ok: false,
+      status: 302,
+      headers: new Headers({ location: "https://app.warp.dev/login" }),
+    })),
+    /does not match/,
+  );
+});

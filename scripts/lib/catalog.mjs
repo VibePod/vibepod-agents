@@ -79,6 +79,10 @@ function sourceLabel(agent) {
     const url = source.url || "";
     return `[script:${url}](${url})`;
   }
+  if (source.type === "redirect") {
+    const url = source.url || "";
+    return `[redirect:${url}](${url})`;
+  }
   if (source.type === "manual") {
     return "manual";
   }
