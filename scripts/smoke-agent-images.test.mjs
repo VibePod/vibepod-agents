@@ -102,6 +102,20 @@ test("Junie Dockerfile pins a fallback version for direct builds", async () => {
   );
 });
 
+test("Warp Dockerfile pins a fallback version for direct builds", async () => {
+  const dockerfile = await readFile(
+    join(repoRoot, "docker/warp/Dockerfile"),
+    "utf8",
+  );
+
+  assert.match(dockerfile, /^ARG WARP_VERSION=v[0-9.]+\.stable_\d+$/m);
+  assert.match(
+    dockerfile,
+    /releases\.warp\.dev\/stable\/\$\{WARP_VERSION\}\/tui\/linux\//,
+  );
+  assert.match(dockerfile, /^ENV WARP_TUI_DISABLE_AUTOUPDATE=1$/m);
+});
+
 test("smoke runner skips cleanly when Docker is unavailable", async () => {
   const tempDir = await mkdtemp(join(tmpdir(), "vibepod-agents-smoke-"));
   try {
