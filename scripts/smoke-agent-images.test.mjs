@@ -116,6 +116,23 @@ test("Warp Dockerfile pins a fallback version for direct builds", async () => {
   assert.match(dockerfile, /^ENV WARP_TUI_DISABLE_AUTOUPDATE=1$/m);
 });
 
+test("ECA Dockerfile pins a fallback server version for direct builds", async () => {
+  const dockerfile = await readFile(
+    join(repoRoot, "docker/eca/Dockerfile"),
+    "utf8",
+  );
+
+  assert.match(dockerfile, /^ARG ECA_VERSION=\d+\.\d+\.\d+$/m);
+  assert.match(
+    dockerfile,
+    /editor-code-assistant\/eca\/releases\/download\/\$\{ECA_VERSION#v\}/,
+  );
+  // eca-cli runs any `eca` it finds on PATH instead of downloading and
+  // auto-updating a server of its own into the persisted mount.
+  assert.match(dockerfile, /-d \/usr\/local\/bin\b/);
+  assert.match(dockerfile, /^CMD \["eca-cli"\]$/m);
+});
+
 test("smoke runner skips cleanly when Docker is unavailable", async () => {
   const tempDir = await mkdtemp(join(tmpdir(), "vibepod-agents-smoke-"));
   try {

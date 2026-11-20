@@ -261,6 +261,22 @@
           "pattern": "releases\\.warp\\.dev/stable/([A-Za-z0-9._-]+)/tui/"
         }
       }
+    },
+    {
+      "target": "eca",
+      "image_name": "eca",
+      "docker_context": "docker/eca",
+      "dockerfile": "docker/eca/Dockerfile",
+      "version_command": "eca --version && eca-cli --version",
+      "platforms": ["linux/amd64", "linux/arm64"],
+      "version_build_arg": "ECA_VERSION",
+      "automation": {
+        "enabled": true,
+        "source": {
+          "type": "github_release",
+          "repo": "editor-code-assistant/eca"
+        }
+      }
     }
   ]
 }

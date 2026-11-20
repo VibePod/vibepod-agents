@@ -114,3 +114,9 @@ services:
     build:
       context: ./docker/warp
       dockerfile: Dockerfile
+
+  eca:
+    image: ${AGENT_NAMESPACE:-vibepod}/eca:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/eca
+      dockerfile: Dockerfile
