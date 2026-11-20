@@ -28,6 +28,7 @@ docker/
   cursor/
   junie/
   warp/
+  eca/
 .github/workflows/
   build.yml
   auto-release.yml
@@ -65,6 +66,7 @@ scripts/
 | `cursor` | `vibepod/cursor` | [script:cursor.com/install](https://cursor.com/install) |
 | `junie` | `vibepod/junie` | [npm:@jetbrains/junie](https://www.npmjs.com/package/@jetbrains/junie) (downloads the matching [github:JetBrains/junie](https://github.com/JetBrains/junie/releases) release zip) |
 | `warp` | `vibepod/warp` | [redirect:app.warp.dev/download/agent-cli/artifact](https://app.warp.dev/download/agent-cli/artifact?os=linux&arch=x86_64) |
+| `eca` | `vibepod/eca` | [github:editor-code-assistant/eca](https://github.com/editor-code-assistant/eca/releases/latest) (plus the latest [github:editor-code-assistant/eca-cli](https://github.com/editor-code-assistant/eca-cli/releases/latest) release at build time) |
 
 Defaults:
 
@@ -177,6 +179,7 @@ git push
   - `devstral` -> `mistralai/mistral-vibe`
   - `agy` -> `google-antigravity/antigravity-cli`
   - `jcode` -> `1jehuang/jcode`
+  - `eca` -> `editor-code-assistant/eca`
 - Current PyPI tracked containers:
   - `tau` -> `tau-ai`
 - Current install-script tracked containers (version parsed from the vendor installer):
